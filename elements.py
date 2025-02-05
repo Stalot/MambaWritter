@@ -34,7 +34,7 @@ class TextBoxFrame(ctk.CTkFrame):
         font_settings = controller.settings["textbox"]["font"]
         textbox_font = ctk.CTkFont(font_settings["family"], font_settings["size"], font_settings["weight"])
         
-        self.textBox = ctk.CTkTextbox(self, corner_radius=0, font=textbox_font)
+        self.textBox = ctk.CTkTextbox(self, corner_radius=0, font=textbox_font, wrap='word')
         self.textBox.grid(row=0, column=0, sticky="nsew")
 
 class DynamicButtonContainer(ctk.CTkFrame):
@@ -75,9 +75,12 @@ class TopBarButtons(ctk.CTkFrame):
             new_button = CustomButton(self, text=text, command=command)
             new_button.pack(side="left")
             id += 1
+
+class Footer(ctk.CTkFrame):
+    def __init__(self,
+                 master):
+        super().__init__(master)
         
-        #self.button_save_file = TransparentButton(self, "Save")
-        #self.button_app_settings = TransparentButton(self, "Settings")
+        label = ctk.CTkLabel(self, text="Open source program, MIT Licence Copyright (c) 2025 Orly Neto")
         
-        #self.button_save_file.pack(side="left")
-        #self.button_app_settings.pack(side="left")
+        label.grid(row=0, column=0, padx=10)

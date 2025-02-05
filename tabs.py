@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from elements import DynamicButtonContainer, TextBoxFrame, TopBarButtons
+from elements import DynamicButtonContainer, TextBoxFrame, TopBarButtons, Footer
 
 # ████████╗ █████╗ ██████╗ ███████╗
 # ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝
@@ -23,23 +23,23 @@ class AppMenu(ctk.CTkFrame):
         self.title = ctk.CTkLabel(self, text="MambaWritter", font=self.font_title)
         self.title.grid(row=0, column=0)
         
-        button_new_file: dict = {"text": "Write a new file",
+        button_new_file: dict = {"text": "Write",
                                  "hover_color": "white",
-                                 "command": self.create_new_file,
+                                 "command": lambda: self.controller.show_frame(WrittingPage),
                                  "font": self.font_button}
-        button_open_file: dict = {"text": "Open a file",
+        button_open_file: dict = {"text": "Settings",
                                  "hover_color": "white",
-                                 "command": self.bazinga,
+                                 "command": lambda: self.controller.show_frame(WrittingPage),
                                  "font": self.font_button}
         
-        self.container = DynamicButtonContainer(self, controller, (button_new_file, button_open_file), vertical=True)
+        self.container = DynamicButtonContainer(self, controller, (button_new_file, button_open_file), vertical=False)
         self.container.grid(row=1, column=0, sticky="n")
+        
+        self.footer = Footer(self)
+        self.footer.grid(row=999, column=0, sticky="ew")
     
     def bazinga(self):
         print("BAZINGAAAAA!!!")
-
-    def create_new_file(self):
-        self.controller.show_frame(WrittingPage)
 
 class WrittingPage(ctk.CTkFrame):
     def __init__(self, master, controller, **kwargs):

@@ -17,8 +17,8 @@ class App(ctk.CTk):
         super().__init__()
         
         self.wm_title("MambaWritter")
-        self.geometry("960x540")
-        #self.attributes("-fullscreen", True)
+        self.geometry("1280x720")
+        self.minsize(720, 405)
         
         with open(settings_path, "r") as f:            
             self.settings: dict = json.loads(f.read())
