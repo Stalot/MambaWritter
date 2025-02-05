@@ -1,5 +1,6 @@
 import customtkinter as ctk
-from elements import DynamicButtonContainer, TextBoxFrame, TopBarButtons, Footer
+from elements import DynamicButtonContainer, TextBoxFrame, TopBarButtons, Footer, idkbro
+from fileManagement import update_json_file
 
 # ████████╗ █████╗ ██████╗ ███████╗
 # ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝
@@ -27,12 +28,12 @@ class AppMenu(ctk.CTkFrame):
                                  "hover_color": "white",
                                  "command": lambda: self.controller.show_frame(WrittingPage),
                                  "font": self.font_button}
-        button_open_file: dict = {"text": "Settings",
+        button_app_settings: dict = {"text": "Settings",
                                  "hover_color": "white",
-                                 "command": lambda: self.controller.show_frame(WrittingPage),
+                                 "command": lambda: self.controller.show_frame(SettingsTab),
                                  "font": self.font_button}
         
-        self.button_container = DynamicButtonContainer(self, controller, (button_new_file, button_open_file), vertical=False)
+        self.button_container = DynamicButtonContainer(self, controller, (button_new_file, button_app_settings), vertical=False)
         self.button_container.grid(row=1, column=0, sticky="n")
         
         self.footer = Footer(self)
@@ -51,9 +52,9 @@ class WrittingPage(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         
         buttons: tuple[dict] = (
-            {"text": "Menu", "command": lambda c=controller: c.show_frame(AppMenu)}, 
+            {"text": "Back", "command": lambda c=controller: c.show_frame(AppMenu)}, 
             {"text": "Save", "command": self.save_file},
-            {"text": "Open", "command": self.load_file}
+            {"text": "Open", "command": self.load_file},
             )
         
         self.topbar = TopBarButtons(self, controller, buttons)
@@ -80,3 +81,35 @@ class WrittingPage(ctk.CTkFrame):
         
         self.box.textBox.delete("0.0", "end")
         self.box.textBox.insert("0.0", text)
+
+class SettingsTab(ctk.CTkFrame):
+    def __init__(self,
+                 master,
+                 controller,
+                 **kwargs):
+        super().__init__(master, **kwargs)
+        
+        buttons: list[dict] = [
+            {"text": "Back", "command": lambda c=controller: c.show_frame(AppMenu)}
+            ]
+        self.topbar = TopBarButtons(self, controller, buttons)
+        self.topbar.grid(row=0, column=0, sticky="ew")
+        
+        self.button_save_changes = ctk.CTkButton(self, text="Save changes", command=self.save_changes)
+        self.button_save_changes.grid(row=1, column=0, pady=40)
+        
+        self.font_size = idkbro(self, controller, default_value=controller.settings["textbox"]["font"]["size"])
+        self.font_size.grid(row=2, column=0, padx=20, pady=20)
+    
+    def save_changes(self):
+        current_app_settings = {
+            "textbox": {
+                "font": {
+                    "size": int(self.font_size.current_value()),
+                    "family": "Times New Roman",
+                    "weight": "normal"                
+                },
+            },
+        }
+        
+        update_json_file("cache\settings.json", current_app_settings)
