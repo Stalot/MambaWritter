@@ -1,7 +1,9 @@
 import customtkinter as ctk
-from tabs import AppMenu, AppMenu2
+from tabs import AppMenu, WrittingPage
+import json
 
 ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("assets/theme/theme.json")
 
 class App(ctk.CTk):
     def __init__(self):
@@ -9,7 +11,10 @@ class App(ctk.CTk):
         
         self.wm_title("MambaWritter")
         self.geometry("960x540")
-        self.attributes("-fullscreen", True)
+        #self.attributes("-fullscreen", True)
+        
+        with open("cache/settings.json", "r") as f:            
+            self.settings: dict = json.loads(f.read())
         
         main_frame = ctk.CTkFrame(self)
         main_frame.pack(side='top', fill='both', expand=True)
@@ -17,7 +22,7 @@ class App(ctk.CTk):
         main_frame.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (AppMenu, AppMenu2):
+        for F in (AppMenu, WrittingPage):
             frame = F(main_frame, self)
             self.frames[F] = frame
 

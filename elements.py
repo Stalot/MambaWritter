@@ -7,89 +7,77 @@ import customtkinter as ctk
 # ███████╗███████╗███████╗██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ███████║
 # ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
 
-class TransparentButton(ctk.CTkButton):
-    def __init__(self,
-                 master,
-                 text = "Clean Button",
-                 text_color = "Black",
-                 text_color_on_hover = "green",
-                 font = None,
-                 command = None,
-                 ):
-        super().__init__(master, text=text, text_color=text_color, fg_color="transparent", font=font, hover=False, command=command)
+class CustomButton(ctk.CTkButton):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
         
-        self.text_color_on_hover = text_color_on_hover
-        
-        self.default_config: dict = {"text": text,
-                                     "text_color": text_color,
-                                     "font": font,
-                                    }
-        
+        self.hover_color = kwargs["hover_color"] if kwargs.get("hover_color") != None else "white"
+
         self.bind("<Enter>", self.mouse_in)
         self.bind("<Leave>", self.mouse_out)
         
     def mouse_in(self, event):
-        self.configure(True, text_color=self.text_color_on_hover)
+        self.configure(True, fg_color=self.hover_color)
 
     def mouse_out(self, event):
-        self.configure(True, text_color=self.default_config["text_color"])
+        self.configure(True, fg_color="white")
 
 class TextBoxFrame(ctk.CTkFrame):
     def __init__(self,
                  master,
                  controller):
-        super().__init__(master, fg_color="RED")
+        super().__init__(master)
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         
-        self.textBox = ctk.CTkTextbox(self, corner_radius=0)
-        self.textBox.grid(row=0, column=0, sticky="nsew")
-
-class MenuButtonContainer(ctk.CTkFrame):
-    def __init__(self,
-                 master,
-                 controller,
-                 buttons: list | tuple = None,
-                 vertical = False):
-        super().__init__(master, fg_color="transparent")
+        font_settings = controller.settings["textbox"]["font"]
+        textbox_font = ctk.CTkFont(font_settings["family"], font_settings["size"], font_settings["weight"])
         
-        self.button_new_file = TransparentButton(self, "New file")
-        self.button_new_file.grid(row=0, column=0)
-        self.button_open_file = TransparentButton(self, "Open file")
-        self.button_open_file.grid(row=0, column=1)
+        self.textBox = ctk.CTkTextbox(self, corner_radius=0, font=textbox_font)
+        self.textBox.grid(row=0, column=0, sticky="nsew")
 
 class DynamicButtonContainer(ctk.CTkFrame):
     def __init__(self,
                  master,
                  controller,
-                 buttons: list | tuple = "Hello, world!",
+                 buttons: list[dict] | tuple[dict] = [{"text": "Hello, world!", "command": None}],
                  vertical = False):
         super().__init__(master, fg_color="transparent")
-        
-        c = 0
-        r = 0
-        for button in buttons:
-            new_button: TransparentButton = TransparentButton(self,
-                                                              button.get("text"),
-                                                              button.get("text_color"),
-                                                              font=button.get("font"),
-                                                              command=button.get("command"))
-            new_button.grid(row=r, column=c, padx=20, pady=20)
+
+        c: int = 0
+        r: int = 0
+        for B in buttons:
+            text = B.get("text") if B.get("text") != None else "Button"
+            font = B.get("font")
+            command = B.get("command")
+            new_button = CustomButton(self, text=text, font=font, hover_color="white", command=command)          
             
             if vertical:
-                r +=1
+                new_button.grid(row=r, column=0, padx=5, pady=10)
             else:
-                c += 1
+                new_button.grid(row=0, column=c, padx=10, pady=5)
+            
+            r += 1
+            c += 1
 
 class TopBarButtons(ctk.CTkFrame):
     def __init__(self,
                  master,
-                 controller):
+                 controller,
+                 buttons: tuple[dict]):
         super().__init__(master)
         
-        self.button_save_file = TransparentButton(self, "Save")
-        self.button_app_settings = TransparentButton(self, "Settings")
+        id = 0
+        for B in buttons:
+            text = B.get("text") if B.get("text") != None else f"Button{id}"
+            command = B.get("command")
+            new_button = CustomButton(self, text=text, command=command)
+            new_button.pack(side="left")
+            id += 1
         
-        self.button_save_file.pack(side="left")
-        self.button_app_settings.pack(side="left")
+        #self.button_save_file = TransparentButton(self, "Save")
+        #self.button_app_settings = TransparentButton(self, "Settings")
+        
+        #self.button_save_file.pack(side="left")
+        #self.button_app_settings.pack(side="left")
