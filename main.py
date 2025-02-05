@@ -1,9 +1,16 @@
 import customtkinter as ctk
 from tabs import AppMenu, WrittingPage
+from fileManagement import find_internal_folder_in_cwd
 import json
+from pathlib import Path
+
+_internal_folder_path: Path | None = find_internal_folder_in_cwd()
+
+settings_path = _internal_folder_path.joinpath("cache/settings.json") if _internal_folder_path else Path.cwd().joinpath("cache/settings.json")
+theme_path = _internal_folder_path.joinpath("assets/theme/theme.json") if _internal_folder_path else Path.cwd().joinpath("assets/theme/theme.json")
 
 ctk.set_appearance_mode("light")
-ctk.set_default_color_theme("assets/theme/theme.json")
+ctk.set_default_color_theme(theme_path)
 
 class App(ctk.CTk):
     def __init__(self):
@@ -13,7 +20,7 @@ class App(ctk.CTk):
         self.geometry("960x540")
         #self.attributes("-fullscreen", True)
         
-        with open("cache/settings.json", "r") as f:            
+        with open(settings_path, "r") as f:            
             self.settings: dict = json.loads(f.read())
         
         main_frame = ctk.CTkFrame(self)
