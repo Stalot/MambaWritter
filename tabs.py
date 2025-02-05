@@ -32,8 +32,8 @@ class AppMenu(ctk.CTkFrame):
                                  "command": lambda: self.controller.show_frame(WrittingPage),
                                  "font": self.font_button}
         
-        self.container = DynamicButtonContainer(self, controller, (button_new_file, button_open_file), vertical=False)
-        self.container.grid(row=1, column=0, sticky="n")
+        self.button_container = DynamicButtonContainer(self, controller, (button_new_file, button_open_file), vertical=False)
+        self.button_container.grid(row=1, column=0, sticky="n")
         
         self.footer = Footer(self)
         self.footer.grid(row=999, column=0, sticky="ew")
@@ -44,6 +44,8 @@ class AppMenu(ctk.CTkFrame):
 class WrittingPage(ctk.CTkFrame):
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, **kwargs)
+        
+        self.controller = controller
         
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -62,14 +64,17 @@ class WrittingPage(ctk.CTkFrame):
 
     def save_file(self):
         print("Saving file...")
-        filename = ctk.filedialog.asksaveasfilename(initialdir='/', title='Save file', filetypes=[('Text file', '*.txt')])
-        with open(f'{filename}.txt', 'w', encoding='utf-8') as f:
-            text: str = str(self.box.textBox.get('0.0', 'end')).strip()
-            f.write(text)
+        
+        filename: str = ctk.filedialog.asksaveasfilename(initialdir=self.controller.user_files_folderpath, title='Save file', filetypes=[('Text file', '*.txt')]).strip()
+        has_filename: bool = True if filename != "" else False
+        if has_filename:
+            with open(f'{filename}.txt', 'w', encoding='utf-8') as f:
+                text: str = str(self.box.textBox.get('0.0', 'end')).strip()
+                f.write(text)
 
     def load_file(self):
         print("Loading file...")
-        filename = ctk.filedialog.askopenfilename(initialdir='/', title='Load file', filetypes=[('Text file', '*.txt')])
+        filename = ctk.filedialog.askopenfilename(initialdir=self.controller.user_files_folderpath, title='Load file', filetypes=[('Text file', '*.txt')])
         with open(filename, 'r', encoding='utf-8') as f:
             text: str = str(f.read()).strip()
         

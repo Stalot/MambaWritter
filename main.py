@@ -8,6 +8,8 @@ _internal_folder_path: Path | None = find_internal_folder_in_cwd()
 
 settings_path = _internal_folder_path.joinpath("cache/settings.json") if _internal_folder_path else Path.cwd().joinpath("cache/settings.json")
 theme_path = _internal_folder_path.joinpath("assets/theme/theme.json") if _internal_folder_path else Path.cwd().joinpath("assets/theme/theme.json")
+appicon_path = _internal_folder_path.joinpath("assets/MambaLogo.ico") if _internal_folder_path else Path.cwd().joinpath("assets/MambaLogo.ico")
+
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme(theme_path)
@@ -17,11 +19,17 @@ class App(ctk.CTk):
         super().__init__()
         
         self.wm_title("MambaWritter")
+        self.iconbitmap(appicon_path)
         self.geometry("1280x720")
         self.minsize(720, 405)
         
         with open(settings_path, "r") as f:            
             self.settings: dict = json.loads(f.read())
+            
+        self.user = Path.home()
+        self.user_files_folderpath: Path = self.user.joinpath("Documents", "MambaWritter")
+        if not self.user_files_folderpath.exists():
+            self.user_files_folderpath.mkdir()
         
         main_frame = ctk.CTkFrame(self)
         main_frame.pack(side='top', fill='both', expand=True)

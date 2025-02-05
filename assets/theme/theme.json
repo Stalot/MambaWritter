@@ -16,7 +16,7 @@
       "corner_radius": 0,
       "border_width": 0,
       "fg_color": "transparent",
-      "hover_color": "pink",
+      "hover_color": "white",
       "border_color": ["#3E454A", "#949A9F"],
       "text_color": "black",
       "text_color_disabled": ["gray74", "gray60"]
