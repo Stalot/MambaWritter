@@ -122,7 +122,7 @@
       "corner_radius": 0,
       "border_width": 0,
       "fg_color": "snow",
-      "border_color": ["#979DA2", "#565B5E"],
+      "border_color": "transparent",
       "text_color": "black",
       "scrollbar_button_color": ["gray55", "gray41"],
       "scrollbar_button_hover_color": ["gray40", "gray53"]
