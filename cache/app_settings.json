@@ -1,4 +1,5 @@
 {
     "font_size": 32,
-    "font_family": "Arial"
+    "font_family": "Arial",
+    "text_wrapping": "word"
 }

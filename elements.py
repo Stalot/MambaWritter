@@ -10,19 +10,24 @@ from fileManagement import path
 # ███████╗███████╗███████╗██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ███████║
 # ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
 
-class Value(ctk.CTkFrame):
+class OptionsComboBox(ctk.CTkFrame):
     def __init__(self,
                  master,
-                 controller):
+                 title: str = "Option",
+                 options: list[str] = ["Value-1", "Value-2", "Value-3"]):
         super().__init__(master)
         
-        self.display = ctk.CTkEntry(self, placeholder_text="32")
-        self.increase_button = ctk.CTkButton(self, text="+")
-        self.decrease_button = ctk.CTkButton(self, text="-")
+        self.title = ctk.CTkLabel(self, text=title, anchor="w")
+        self.optionsBox = ctk.CTkComboBox(self, values=[item for item in options])
         
-        self.display.grid(row=0, column=1, sticky="ew")
-        self.increase_button.grid(row=0, column=0, sticky="e")
-        self.decrease_button.grid(row=0, column=2, sticky="w")
+        self.title.grid(row=0, column=0, sticky="ew")
+        self.optionsBox.grid(row=1, column=0)
+    
+    def current_selection(self) -> str:
+        return str(self.optionsBox.get())
+    
+    def set_default_value(self, value: str) -> None:
+        self.optionsBox.set(str(value))
 
 class TopBar(ctk.CTkFrame):
     def __init__(self,

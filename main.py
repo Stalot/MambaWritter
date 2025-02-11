@@ -13,20 +13,20 @@ class App(ctk.CTk):
         self.wm_title("MambaWritter")
         self.iconbitmap(path("assets/icons/MambaIcon.ico"))
         self.geometry("1280x720")
-        self.minsize(720, 405)
+        self.minsize(320, 180)
         
         main_frame = ctk.CTkFrame(self)
         main_frame.pack(fill="both", expand=True)
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
         
-        settings_json_path = Path(path("cache/app_settings.json"))
-        custom_settings_json_path = Path(path("cache/custom_app_settings.json"))
-        if custom_settings_json_path.exists():
-            with open(custom_settings_json_path, "r") as f:
+        self.settings_json_path = Path(path("cache/app_settings.json"))
+        self.custom_settings_json_path = Path(path("cache/custom_app_settings.json"))
+        if self.custom_settings_json_path.exists():
+            with open(self.custom_settings_json_path, "r") as f:
                 self.app_settings = json.loads(f.read())
         else:
-            with open(settings_json_path, "r") as f:
+            with open(self.settings_json_path, "r") as f:
                 self.app_settings = json.loads(f.read())
             
         
