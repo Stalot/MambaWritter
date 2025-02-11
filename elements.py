@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from pathlib import Path
 from PIL import Image
+from fileManagement import path
 
 # ███████╗██╗     ███████╗███╗   ███╗███████╗███╗   ██╗████████╗███████╗
 # ██╔════╝██║     ██╔════╝████╗ ████║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
@@ -9,37 +10,29 @@ from PIL import Image
 # ███████╗███████╗███████╗██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ███████║
 # ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
 
-class FileRow(ctk.CTkFrame):
+class Value(ctk.CTkFrame):
+    def __init__(self,
+                 master,
+                 controller):
+        super().__init__(master)
+        
+        self.display = ctk.CTkEntry(self, placeholder_text="32")
+        self.increase_button = ctk.CTkButton(self, text="+")
+        self.decrease_button = ctk.CTkButton(self, text="-")
+        
+        self.display.grid(row=0, column=1, sticky="ew")
+        self.increase_button.grid(row=0, column=0, sticky="e")
+        self.decrease_button.grid(row=0, column=2, sticky="w")
+
+class TopBar(ctk.CTkFrame):
     def __init__(self,
                  master,
                  controller,
-                 filepath: Path,
-                 command):
+                 buttons: list[list]):
         super().__init__(master)
         
-        self.controller = controller
-        
-        fileicon = ctk.CTkImage(Image.open("assets/icons/FileIcon.png"), size=(32, 32))
-        
-        self.filename = filepath.name
-        #self.filepath = filepath.absolute()
-        
-        self.file = ctk.CTkButton(self, image=fileicon, text=self.filename, font=ctk.CTkFont("arial", 16), anchor="w", command=lambda: command(filepath.absolute()))
-        self.file.grid(row=0, column=0, sticky="ew")
-
-class UserFiles(ctk.CTkFrame):
-    def __init__(self, master, controller):
-        super().__init__(master)
-        
-        self.title = ctk.CTkLabel(self, text="User Files", font=ctk.CTkFont("arial", 24))
-        self.title.grid(row=0, column=0, pady=(0, 16), sticky="w")
-        
-        r = 1
-        for file in Path("C:/Users/Junior/Documents/MambaWritter").glob("*"):
-            file_row = FileRow(self, controller, file, master.open_file)
-            file_row.grid(row=r, column=0, sticky="w")
-            r += 1
-
-if __name__ == "__main__":
-    for file in Path("C:/Users/Junior/Documents/MambaWritter").glob("*"):
-        print(file.absolute().name)
+        c = 0
+        for b in buttons:
+            new_button = ctk.CTkButton(self, text=b[0], command=b[1])
+            new_button.grid(row=0, column=c, padx=10)
+            c += 1
