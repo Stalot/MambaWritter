@@ -1,5 +1,6 @@
 {
     "font_size": 32,
     "font_family": "Arial",
-    "text_wrapping": "word"
+    "text_wrapping": "word",
+    "appearance_mode": "light"
 }

@@ -18,7 +18,7 @@ class OptionsComboBox(ctk.CTkFrame):
         super().__init__(master)
         
         self.title = ctk.CTkLabel(self, text=title, anchor="w")
-        self.optionsBox = ctk.CTkComboBox(self, values=[item for item in options])
+        self.optionsBox = ctk.CTkComboBox(self, values=[item for item in options], )
         
         self.title.grid(row=0, column=0, sticky="ew")
         self.optionsBox.grid(row=1, column=0)
@@ -38,6 +38,6 @@ class TopBar(ctk.CTkFrame):
         
         c = 0
         for b in buttons:
-            new_button = ctk.CTkButton(self, text=b[0], command=b[1])
+            new_button = ctk.CTkButton(self, text=b[0], command=b[1], hover=False)
             new_button.grid(row=0, column=c, padx=10)
             c += 1

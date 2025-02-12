@@ -28,8 +28,9 @@ class App(ctk.CTk):
         else:
             with open(self.settings_json_path, "r") as f:
                 self.app_settings = json.loads(f.read())
-            
         
+        ctk.set_appearance_mode(self.app_settings["appearance_mode"])
+
         frame_list: tuple[ctk.CTkFrame] = [WrittingPage, Settings]
         self.frames = {}
         for F in frame_list:

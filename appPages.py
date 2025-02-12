@@ -4,6 +4,7 @@ from elements import TopBar, OptionsComboBox
 from pathlib import Path
 import json
 from fileManagement import path
+from tkinter import font
 
 #  █████╗ ██████╗ ██████╗     ██████╗  █████╗  ██████╗ ███████╗███████╗
 # ██╔══██╗██╔══██╗██╔══██╗    ██╔══██╗██╔══██╗██╔════╝ ██╔════╝██╔════╝
@@ -16,13 +17,16 @@ class Settings(ctk.CTkFrame):
     def __init__(self, master, controller):
         super().__init__(master)
         
+        #self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        
         self.controller = controller
         
         buttons = [["Back", lambda: controller.show_frame(WrittingPage)],
                    ["Save Changes", self.save_changes],
                    ]
         self.topBar = TopBar(self, controller, buttons)
-        self.topBar.grid(row=0, column=0, sticky="new")
+        self.topBar.grid(row=0, column=0, sticky="ew")
         
         self.font_size = OptionsComboBox(self, "Font size:", ["4", "8", "16", "24", "32", "48", "64", "80", "96"])
         self.font_size.grid(row=1, column=0, sticky="w", padx=20, pady=20)
@@ -31,10 +35,23 @@ class Settings(ctk.CTkFrame):
         self.text_wrapping = OptionsComboBox(self, "Wrap:", ["char", "word", "none"])
         self.text_wrapping.grid(row=2, column=0, sticky="w", padx=20, pady=20)
         self.text_wrapping.set_default_value(self.controller.app_settings["text_wrapping"])
+        
+        self.font_family = OptionsComboBox(self, "Font Family:", [str(family) for family in font.families()])
+        self.font_family.grid(row=3, column=0, sticky="w", padx=20, pady=20)
+        self.font_family.set_default_value(self.controller.app_settings["font_family"])
+        
+        self.appearance_mode = OptionsComboBox(self, "Appearance Mode", ["light", "dark"])
+        self.appearance_mode.grid(row=4, column=0, sticky="w", padx=20, pady=20)
+        self.appearance_mode.set_default_value(self.controller.app_settings["appearance_mode"])
 
     def save_changes(self):
         self.controller.app_settings["font_size"] = int(self.font_size.current_selection())
         self.controller.app_settings["text_wrapping"] = self.text_wrapping.current_selection()
+        self.controller.app_settings["font_family"] = self.font_family.current_selection()
+        self.controller.app_settings["appearance_mode"] = self.appearance_mode.current_selection()
+        
+        ctk.set_appearance_mode(self.appearance_mode.current_selection())
+        
         with open(self.controller.custom_settings_json_path, "w") as f:
             new_data: dict = self.controller.app_settings
             f.write(json.dumps(new_data))
