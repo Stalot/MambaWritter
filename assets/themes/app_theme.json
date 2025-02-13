@@ -94,10 +94,10 @@
       "corner_radius": 12,
       "border_width": 2,
       "fg_color": ["#F9F9FA", "#343638"],
-      "border_color": ["#979DA2", "#565B5E"],
-      "button_color": ["#979DA2", "#565B5E"],
-      "button_hover_color": ["#6E7174", "#7A848D"],
-      "text_color": ["gray14", "gray84"],
+      "border_color": ["pink", "#565B5E"],
+      "button_color": ["pink", "#565B5E"],
+      "button_hover_color": ["snow", "#7A848D"],
+      "text_color": ["black", "white"],
       "text_color_disabled": ["gray50", "gray45"]
     },
     "CTkScrollbar": {

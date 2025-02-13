@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 def find_internal_folder_in_cwd() -> Path | None:
     """
@@ -13,7 +14,7 @@ def find_internal_folder_in_cwd() -> Path | None:
             folder_match = file.absolute()
     return folder_match
 
-def path(path: str | Path) -> str:
+def path(path: str | Path) -> Path:
     """
     Retrieves an absolute path based on the current working directory.
 
@@ -27,12 +28,18 @@ def path(path: str | Path) -> str:
     output_path = None
     # If the _internal folder doesn't exist:
     if not internal_folder:
-        output_path = cwd.joinpath(path).absolute().as_posix()
+        output_path = cwd.joinpath(path).absolute()
         return output_path
 
     # If it does:
-    output_path = internal_folder.joinpath(path).absolute().as_posix()
+    output_path = internal_folder.joinpath(path).absolute()
     return output_path
 
+def read_json(filepath: str | Path) -> dict:
+    with open(filepath, "r") as json_file:
+        data: dict = json.loads(json_file.read())
+    return data
+
 if __name__ == "__main__":
-    print(path("assets\icons\FileIcon.png"))
+    data = read_json("cache/app_settings.json")
+    print(data)
