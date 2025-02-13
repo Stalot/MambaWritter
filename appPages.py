@@ -121,7 +121,7 @@ class WrittingPage(ctk.CTkFrame):
             self.controller.wm_title(f"MambaWritter - {self.current_file}")
             with open(filename, 'r', encoding='utf-8') as f:
                 for line in f:
-                    self.textBox.insert("0.0", line)
+                    self.textBox.insert("end", line)
 
     def new_file(self):
         self.textBox.delete("0.0", "end")

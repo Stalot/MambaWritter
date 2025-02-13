@@ -2,7 +2,6 @@ import customtkinter as ctk
 from appPages import WrittingPage, Settings
 from fileManagement import bundle_path, read_json
 from pathlib import Path
-import json
 
 ctk.set_default_color_theme(bundle_path("assets/themes/app_theme.json"))
 
