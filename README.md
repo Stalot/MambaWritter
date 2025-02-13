@@ -1,3 +1,3 @@
 # MambaWritter
 
-*Nothing to see here yet!*
+**MambaWritter** is a simple note-taking app created with python!
