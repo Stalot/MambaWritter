@@ -1,5 +1,6 @@
 .venv/
 __pycache__/
 output/
+junk/
 pyinstaller_config_settings.json
 custom_app_settings.json

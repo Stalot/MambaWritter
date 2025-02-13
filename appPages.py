@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 from tkinter import font
 from typing import Any
+import os
 
 #  █████╗ ██████╗ ██████╗     ██████╗  █████╗  ██████╗ ███████╗███████╗
 # ██╔══██╗██╔══██╗██╔══██╗    ██╔══██╗██╔══██╗██╔════╝ ██╔════╝██╔════╝
@@ -54,10 +55,11 @@ class Settings(ctk.CTkFrame):
         self.controller.app_settings["appearance_mode"] = self.appearance_mode.current_selection()
         
         ctk.set_appearance_mode(self.appearance_mode.current_selection())
-        
+                
         with open(self.controller.custom_settings_json_path, "w") as f:
             new_data: dict = self.controller.app_settings
             f.write(json.dumps(new_data))
+            os.chmod(self.controller.custom_settings_json_path, 0o666)
 
 class WrittingPage(ctk.CTkFrame):
     def __init__(self, master, controller):
@@ -68,7 +70,9 @@ class WrittingPage(ctk.CTkFrame):
         
         self.controller = controller
         
-        self.user_files_directory = Path.home().joinpath("Documents/MambaWritter").as_posix()
+        self.user_files_directory = Path.home().joinpath("Documents/MambaWritter")
+        if not self.user_files_directory.exists():
+            self.user_files_directory.mkdir()
         self.current_file = None
         
         buttons = [["New File", self.new_file],
@@ -94,7 +98,7 @@ class WrittingPage(ctk.CTkFrame):
                                wrap=self.controller.app_settings["text_wrapping"])
         
     def save_file(self, event: Any = None):      
-        filename: str = ctk.filedialog.asksaveasfilename(initialdir=self.user_files_directory,
+        filename: str = ctk.filedialog.asksaveasfilename(initialdir=self.user_files_directory.as_posix(),
                                                          initialfile=self.current_file if self.current_file else "",
                                                          title='Save file',
                                                          filetypes=[('Text file', '*.txt')])
@@ -107,7 +111,7 @@ class WrittingPage(ctk.CTkFrame):
             self.controller.wm_title(f"MambaWritter - {self.current_file}")
 
     def load_file(self):
-        filename = ctk.filedialog.askopenfilename(initialdir=self.user_files_directory,
+        filename = ctk.filedialog.askopenfilename(initialdir=self.user_files_directory.as_posix(),
                                                   title='Load file',
                                                   filetypes=[('Text file', '*.txt')])
         has_filename: bool = True if filename != "" else False

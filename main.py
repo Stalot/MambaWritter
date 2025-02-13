@@ -1,17 +1,17 @@
 import customtkinter as ctk
 from appPages import WrittingPage, Settings
-from fileManagement import path, read_json
+from fileManagement import bundle_path, read_json
 from pathlib import Path
 import json
 
-ctk.set_default_color_theme(path("assets/themes/app_theme.json"))
+ctk.set_default_color_theme(bundle_path("assets/themes/app_theme.json"))
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         
         self.wm_title("MambaWritter")
-        self.iconbitmap(path("assets/icons/MambaIcon.ico"))
+        self.iconbitmap(bundle_path("assets/icons/MambaIcon.ico"))
         self.geometry("720x540")
         self.minsize(320, 180)
         
@@ -20,8 +20,8 @@ class App(ctk.CTk):
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
         
-        self.settings_json_path: Path = path("cache/app_settings.json")
-        self.custom_settings_json_path: Path = path("cache/custom_app_settings.json")
+        self.settings_json_path: Path = bundle_path("cache/app_settings.json")
+        self.custom_settings_json_path: Path = bundle_path("cache/custom_app_settings.json")
         self.app_settings: dict = read_json(self.settings_json_path) if not self.custom_settings_json_path.exists() else read_json(self.custom_settings_json_path)
         
         ctk.set_appearance_mode(self.app_settings["appearance_mode"])

@@ -1,39 +1,11 @@
 from pathlib import Path
 import json
+import sys
 
-def find_internal_folder_in_cwd() -> Path | None:
-    """
-    Searchs for the _internal folder in the Current Working Directory (cwd).
-    """
-    cwd = Path.cwd()
-    intern_files = (file for file in cwd.glob("*"))
-    
-    folder_match = None
-    for file in intern_files:
-        if file.name == "_internal":
-            folder_match = file.absolute()
-    return folder_match
-
-def path(path: str | Path) -> Path:
-    """
-    Retrieves an absolute path based on the current working directory.
-
-    The function first checks if an internal folder exists in the current working directory.
-    If the internal folder does not exist, it joins the provided path with the current working directory.
-    If the internal folder exists, it joins the provided path with the internal folder.
-    """
-    cwd = Path.cwd()
-    internal_folder: Path | None = find_internal_folder_in_cwd()
-    
-    output_path = None
-    # If the _internal folder doesn't exist:
-    if not internal_folder:
-        output_path = cwd.joinpath(path).absolute()
-        return output_path
-
-    # If it does:
-    output_path = internal_folder.joinpath(path).absolute()
-    return output_path
+def bundle_path(path: str | Path) -> Path:
+    bundle_dir = Path(getattr(sys, '_MEIPASS', Path.cwd()))
+    config_path = bundle_dir / path
+    return config_path
 
 def read_json(filepath: str | Path) -> dict:
     with open(filepath, "r") as json_file:
@@ -41,5 +13,5 @@ def read_json(filepath: str | Path) -> dict:
     return data
 
 if __name__ == "__main__":
-    data = read_json("cache/app_settings.json")
-    print(data)
+    path = bundle_path("cache/custom_app_settings.json")
+    print(path)
