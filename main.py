@@ -1,7 +1,8 @@
 import customtkinter as ctk
 from appPages import WrittingPage, Settings
-from fileManagement import bundle_path, read_json
+from fileManagement import bundle_path, read_json, create_app_necessary_folders
 from pathlib import Path
+from typing import Final
 
 ctk.set_default_color_theme(bundle_path("assets/themes/app_theme.json"))
 
@@ -19,8 +20,10 @@ class App(ctk.CTk):
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
         
-        self.settings_json_path: Path = bundle_path("cache/app_settings.json")
-        self.custom_settings_json_path: Path = bundle_path("cache/custom_app_settings.json")
+        self.FOLDER_PATHS: Final[dict[str, Path]] = create_app_necessary_folders()
+        
+        self.settings_json_path: Path = bundle_path("config/app_settings.json")
+        self.custom_settings_json_path: Path = self.FOLDER_PATHS["appdata"] / "custom_app_settings.json" #bundle_path("config/custom_app_settings.json")
         self.app_settings: dict = read_json(self.settings_json_path) if not self.custom_settings_json_path.exists() else read_json(self.custom_settings_json_path)
         
         ctk.set_appearance_mode(self.app_settings["appearance_mode"])

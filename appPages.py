@@ -59,7 +59,6 @@ class Settings(ctk.CTkFrame):
         with open(self.controller.custom_settings_json_path, "w") as f:
             new_data: dict = self.controller.app_settings
             f.write(json.dumps(new_data))
-            os.chmod(self.controller.custom_settings_json_path, 0o666)
 
 class WrittingPage(ctk.CTkFrame):
     def __init__(self, master, controller):
@@ -70,9 +69,9 @@ class WrittingPage(ctk.CTkFrame):
         
         self.controller = controller
         
-        self.user_files_directory = Path.home().joinpath("Documents/MambaWritter")
-        if not self.user_files_directory.exists():
-            self.user_files_directory.mkdir()
+        self.user_files_directory = controller.FOLDER_PATHS["documents"] # Path.home().joinpath("Documents/MambaWritter")
+        # if not self.user_files_directory.exists():
+        #     self.user_files_directory.mkdir()
         self.current_file: Path = None
         
         buttons = [["New File", self.new_file],
