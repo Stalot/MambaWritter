@@ -69,9 +69,6 @@ class WrittingPage(ctk.CTkFrame):
         
         self.controller = controller
         
-        self.user_files_directory = controller.FOLDER_PATHS["documents"]
-        self.current_file: Path = None
-        
         buttons = [["New File", controller.new_file],
                    ["Save File", controller.ask_save_file],
                    ["Open File", controller.ask_open_file],
@@ -85,7 +82,7 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.grid(row=1, column=0, sticky="nsew")
         
         self.textBox.bind("<Expose>", self.refresh)
-        self.textBox.bind("<Control-s>", self.controller.save_file_that_already_exists)
+        self.textBox.bind("<Control-s>", self.controller.ask_save_file)
     
     def refresh(self, event):
         self.textBox_font.configure(family=self.controller.app_settings["font_family"],

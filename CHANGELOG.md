@@ -3,7 +3,8 @@
 ## 0.?.?
 
 - Windows installer
-- Logo changed
+- Logo change
+- Ask save file when closing window
 - Shortcut: Use CTRL+S to save files
 
 ### Bug fixes:

@@ -45,6 +45,8 @@ class App(ctk.CTk):
         
         self.show_frame(WrittingPage)
         self.open_file_on_start()
+        
+        self.protocol("WM_DELETE_WINDOW", self.ask_save_file_when_closing)
 
     def show_frame(self, frame_to_raise):
         frame: ctk.CTkFrame = self.frames[frame_to_raise]
@@ -65,22 +67,25 @@ class App(ctk.CTk):
             except Exception as e:
                 self.writtingpage_textbox.insert("0.0", f"FATAL ERROR:\n{e}")
 
-    def save_file_that_already_exists(self, event):
-        if self.current_file:
-            self.wm_title(f"MambaWritter - {self.current_file.stem}")
-            Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+    def ask_save_file_when_closing(self):
+        self.ask_save_file()
+        self.destroy()
 
     def ask_save_file(self, event: Any = None):
-        file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
-                                     filetypes=[("Text file", "*.txt"),
-                                                ("Markdown file", "*.md")],
-                                     initialdir=self.user_files_directory,
-                                     title="Save file")
-        if file:
-            self.current_file = Path(file.name)
+        if self.current_file: # If file already exists
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
-            
-            Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+            Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+        else: # Otherwise...
+            file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
+                                        filetypes=[("Text file", "*.txt"),
+                                                    ("Markdown file", "*.md")],
+                                        initialdir=self.user_files_directory,
+                                        title="Save file")
+            if file:
+                self.current_file = Path(file.name)
+                self.wm_title(f"MambaWritter - {self.current_file.stem}")
+                
+                Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
 
     def ask_open_file(self):
         file = ctk.filedialog.askopenfile(defaultextension="*.txt",
