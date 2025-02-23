@@ -69,14 +69,12 @@ class WrittingPage(ctk.CTkFrame):
         
         self.controller = controller
         
-        self.user_files_directory = controller.FOLDER_PATHS["documents"] # Path.home().joinpath("Documents/MambaWritter")
-        # if not self.user_files_directory.exists():
-        #     self.user_files_directory.mkdir()
+        self.user_files_directory = controller.FOLDER_PATHS["documents"]
         self.current_file: Path = None
         
-        buttons = [["New File", self.new_file],
-                   ["Save File", self.save_file],
-                   ["Open File", self.load_file],
+        buttons = [["New File", controller.new_file],
+                   ["Save File", controller.ask_save_file],
+                   ["Open File", controller.ask_open_file],
                    ["Settings", lambda: controller.show_frame(Settings)]
                    ]
         self.topBar = TopBar(self, controller, buttons)
@@ -87,7 +85,7 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.grid(row=1, column=0, sticky="nsew")
         
         self.textBox.bind("<Expose>", self.refresh)
-        self.textBox.bind("<Control-s>", self.save_file_that_already_exists)
+        self.textBox.bind("<Control-s>", self.controller.save_file_that_already_exists)
     
     def refresh(self, event):
         self.textBox_font.configure(family=self.controller.app_settings["font_family"],
@@ -95,40 +93,3 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.focus_set()
         self.textBox.configure(font=self.textBox_font,
                                wrap=self.controller.app_settings["text_wrapping"])
-
-    def save_file_that_already_exists(self, event):
-        if self.current_file:
-            self.controller.wm_title(f"MambaWritter - {self.current_file.stem}")
-            Path(self.current_file.absolute()).write_text(self.textBox.get('0.0', 'end').strip(), "utf-8")
-
-    def save_file(self, event: Any = None):      
-        file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
-                                     filetypes=[("Text file", "*.txt"),
-                                                ("Markdown file", "*.md")],
-                                     initialdir=self.user_files_directory,
-                                     title="Save file")
-        if file:
-            self.current_file = Path(file.name)
-            self.controller.wm_title(f"MambaWritter - {self.current_file.stem}")
-            
-            Path(file.name).write_text(self.textBox.get('0.0', 'end').strip(), "utf-8")
-
-    def load_file(self):
-        file = ctk.filedialog.askopenfile(defaultextension="*.txt",
-                                   filetypes=[("Text file", "*.txt"),
-                                                ("Markdown file", "*.md")],
-                                   initialdir=self.user_files_directory,
-                                   title="Open File")
-        if file:
-            self.textBox.delete("0.0", "end")
-            self.current_file = Path(file.name)
-            self.controller.wm_title(f"MambaWritter - {self.current_file.stem}")
-            
-            with open(file.name, 'r', encoding='utf-8') as f:
-                for line in f:
-                    self.textBox.insert("end", line)
-
-    def new_file(self):
-        self.textBox.delete("0.0", "end")
-        self.current_file = None
-        self.controller.wm_title("MambaWritter")

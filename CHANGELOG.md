@@ -2,7 +2,9 @@
 
 ## 0.?.?
 
-- Shortcut: CTRL+S to save files
+- Windows installer
+- Logo changed
+- Shortcut: Use CTRL+S to save files
 
 ### Bug fixes:
 - File extension bug while overwriting file

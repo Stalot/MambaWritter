@@ -1,11 +1,18 @@
 from pathlib import Path
 import json
 import sys
-from typing import Final
+from typing import Final, Iterator
 
-def bundle_path(path: str | Path) -> Path:
+def bundle_path(relative_path: str | Path) -> Path:
+    """
+    Resolves the given path relative to the application's bundle directory.
+
+    The function checks if the application is running in a bundled environment,
+    like when the application is packaged using tools like PyInstaller, and adjusts
+    the path accordingly.
+    """
     bundle_dir = Path(getattr(sys, '_MEIPASS', Path.cwd()))
-    config_path = bundle_dir / path
+    config_path = bundle_dir / relative_path
     return config_path
 
 def create_app_necessary_folders() -> dict[str, Path]:
@@ -29,6 +36,11 @@ def read_json(filepath: str | Path) -> dict:
     with open(filepath, "r") as json_file:
         data: dict = json.loads(json_file.read())
     return data
+
+def iterate_file(filepath: str | Path) -> Iterator:
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            yield line
 
 if __name__ == "__main__":
     FOLDER_PATHS: Final[dict[str, Path]] = create_app_necessary_folders()
