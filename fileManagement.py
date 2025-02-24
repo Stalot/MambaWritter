@@ -1,7 +1,7 @@
 from pathlib import Path
+from typing import Final, Iterator
 import json
 import sys
-from typing import Final, Iterator
 
 def bundle_path(relative_path: str | Path) -> Path:
     """

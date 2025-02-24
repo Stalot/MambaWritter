@@ -1,10 +1,12 @@
-import customtkinter as ctk
 from appPages import WrittingPage, Settings
 from fileManagement import bundle_path, read_json, create_app_necessary_folders, iterate_file
 from pathlib import Path
 from typing import Final
-import sys
 from typing import Any, Dict, Optional
+from tkinter import messagebox
+import customtkinter as ctk
+import sys
+import os
 
 ctk.set_default_color_theme(bundle_path("assets/themes/app_theme.json"))
 
@@ -28,8 +30,11 @@ class App(ctk.CTk):
         self.custom_settings_json_path: Path = self.FOLDER_PATHS["appdata"] / "custom_app_settings.json"
         self.app_settings: dict = read_json(self.default_settings_json_path) if not self.custom_settings_json_path.exists() else read_json(self.custom_settings_json_path)
         
-        self.user_files_directory = self.FOLDER_PATHS["documents"]
+        self.device_logged_user_name: str = os.getlogin()
+        self.user_files_directory: Path = self.FOLDER_PATHS["documents"]
         self.current_file: Optional[Path] = None
+        self.unsaved_changes: bool = False
+        self.file_initial_content: str = ""
         
         ctk.set_appearance_mode(self.app_settings["appearance_mode"])
 
@@ -46,7 +51,7 @@ class App(ctk.CTk):
         self.show_frame(WrittingPage)
         self.open_file_on_start()
         
-        self.protocol("WM_DELETE_WINDOW", self.ask_save_file_when_closing)
+        self.protocol("WM_DELETE_WINDOW", self.closing_application)
 
     def show_frame(self, frame_to_raise):
         frame: ctk.CTkFrame = self.frames[frame_to_raise]
@@ -66,26 +71,30 @@ class App(ctk.CTk):
                     self.writtingpage_textbox.insert("end", line)
             except Exception as e:
                 self.writtingpage_textbox.insert("0.0", f"FATAL ERROR:\n{e}")
+        self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
 
-    def ask_save_file_when_closing(self):
-        self.ask_save_file()
-        self.destroy()
+    def closing_application(self):
+        if self.unsaved_changes: # Checks if the current file has unsaved changes!
+            if messagebox.askyesno("Unsaved Changes",
+                                   f"Hey {self.device_logged_user_name}, your file has unsaved changes! Do you want to save your work before closing?"):
+                if self.current_file:
+                    Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+                else:
+                    self.ask_save_file()
+        self.destroy() # Closes (destroy) window after everything
 
     def ask_save_file(self, event: Any = None):
-        if self.current_file: # If file already exists
+        file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
+                                    filetypes=[("Text file", "*.txt"),
+                                                ("Markdown file", "*.md")],
+                                    initialdir=self.user_files_directory,
+                                    title="Save file")
+        if file:
+            self.current_file = Path(file.name)
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
-            Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
-        else: # Otherwise...
-            file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
-                                        filetypes=[("Text file", "*.txt"),
-                                                    ("Markdown file", "*.md")],
-                                        initialdir=self.user_files_directory,
-                                        title="Save file")
-            if file:
-                self.current_file = Path(file.name)
-                self.wm_title(f"MambaWritter - {self.current_file.stem}")
-                
-                Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+            
+            Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+            self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
 
     def ask_open_file(self):
         file = ctk.filedialog.askopenfile(defaultextension="*.txt",
@@ -100,10 +109,12 @@ class App(ctk.CTk):
             
             for line in iterate_file(file.name):
                 self.writtingpage_textbox.insert("end", line)
+            self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
 
     def new_file(self):
         self.writtingpage_textbox.delete("0.0", "end")
         self.current_file = None
+        self.file_initial_content = ""
         self.wm_title("MambaWritter")
 
 app = App()

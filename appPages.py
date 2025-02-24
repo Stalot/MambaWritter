@@ -1,10 +1,8 @@
-import customtkinter as ctk
 from elements import TopBar, OptionsComboBox
-from pathlib import Path
-import json
 from tkinter import font
 from typing import Any
-import os
+import customtkinter as ctk
+import json
 
 #  █████╗ ██████╗ ██████╗     ██████╗  █████╗  ██████╗ ███████╗███████╗
 # ██╔══██╗██╔══██╗██╔══██╗    ██╔══██╗██╔══██╗██╔════╝ ██╔════╝██╔════╝
@@ -82,6 +80,7 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.grid(row=1, column=0, sticky="nsew")
         
         self.textBox.bind("<Expose>", self.refresh)
+        self.textBox.bind("<Key>", self.check_file_changes)
         self.textBox.bind("<Control-s>", self.controller.ask_save_file)
     
     def refresh(self, event):
@@ -90,3 +89,9 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.focus_set()
         self.textBox.configure(font=self.textBox_font,
                                wrap=self.controller.app_settings["text_wrapping"])
+    
+    def check_file_changes(self, event):
+        if self.controller.file_initial_content != self.textBox.get("0.0", "end").strip():
+            self.controller.unsaved_changes = True
+        else:
+            self.controller.unsaved_changes = False
