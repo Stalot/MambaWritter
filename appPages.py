@@ -29,22 +29,22 @@ class Settings(ctk.CTkFrame):
         self.font_size = OptionsComboBox(self, "Font size:", ["16", "24", "32", "48", "64", "80", "96"])
         self.font_size.grid(row=1, column=0, sticky="w", padx=20, pady=20)
         
-        self.text_wrapping = OptionsComboBox(self, "Wrap:", ["char", "word", "none"])
+        self.text_wrapping = OptionsComboBox(self, "Wrap:", ["Char", "Word", "None"])
         self.text_wrapping.grid(row=2, column=0, sticky="w", padx=20, pady=20)
         
         self.font_family = OptionsComboBox(self, "Font Family:", [str(family) for family in font.families()])
         self.font_family.grid(row=3, column=0, sticky="w", padx=20, pady=20)
         
-        self.appearance_mode = OptionsComboBox(self, "Appearance Mode", ["light", "dark"])
+        self.appearance_mode = OptionsComboBox(self, "Appearance Mode", ["System", "Light", "Dark"])
         self.appearance_mode.grid(row=4, column=0, sticky="w", padx=20, pady=20)
         
         self.bind("<Expose>", self.update_changes)
         
     def update_changes(self, event: Any = None):
         self.font_size.set_default_value(self.controller.app_settings["font_size"])
-        self.text_wrapping.set_default_value(self.controller.app_settings["text_wrapping"])
+        self.text_wrapping.set_default_value(str(self.controller.app_settings["text_wrapping"]).capitalize())
         self.font_family.set_default_value(self.controller.app_settings["font_family"])
-        self.appearance_mode.set_default_value(self.controller.app_settings["appearance_mode"])
+        self.appearance_mode.set_default_value(str(self.controller.app_settings["appearance_mode"]).capitalize())
 
     def save_changes(self):
         self.controller.app_settings["font_size"] = int(self.font_size.current_selection())

@@ -2,5 +2,5 @@
     "font_size": 24,
     "font_family": "Arial",
     "text_wrapping": "word",
-    "appearance_mode": "light"
+    "appearance_mode": "system"
 }
