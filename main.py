@@ -123,7 +123,7 @@ class App(ctk.CTk):
     def new_file(self):
         if self.unsaved_changes: # Checks if the current file has unsaved changes...
             if messagebox.askyesno("Unsaved Changes",
-                                   f"Wait {self.device_logged_user_name}! Do you want to create a new file?"):
+                                   f"{self.device_logged_user_name}, wait!\nYour file has unsaved changes, do you want to create a new file anyway?"):
                 self.clear_textbox_content()
         else:
             self.clear_textbox_content()
