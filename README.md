@@ -2,5 +2,5 @@
 
 **MambaWritter** is a simple note-taking app created with python!
 
-## Supported OS:
-- Windows
+## Supported Operating Systems:
+Windows is currently the only supported OS.

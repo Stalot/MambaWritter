@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.?.?
+## 1.0.0
 
 - Windows installer
-- Logo change
-- Ask save file when closing window
+- Logo changes
+- Unsaved changes need confirmation to be discarded
 - Shortcut: Use CTRL+S to save files
 
 ### Bug fixes:
