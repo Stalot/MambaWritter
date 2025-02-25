@@ -117,7 +117,7 @@ class App(ctk.CTk):
                                     initialdir=self.user_files_directory,
                                     title="Open File")
         if file:
-            self.writtingpage_textbox.delete("0.0", "end")
+            self.clear_textbox_content()
             self.current_file = Path(file.name)
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
             
@@ -130,7 +130,6 @@ class App(ctk.CTk):
             if not messagebox.askyesno("Unsaved Changes",
                                    f"{self.device_logged_user_name}, wait!\nYour file has unsaved changes, do you want to create a new file anyway?"):
                 return None
-        self.writtingpage_textbox.edit_modified(False)
         self.clear_textbox_content()
 
     def clear_textbox_content(self) -> None:
