@@ -81,7 +81,10 @@ class WrittingPage(ctk.CTkFrame):
         
         self.textBox.bind("<Expose>", self.refresh)
         self.textBox.bind("<Key>", self.check_file_changes)
+        
+        # Tkinter binding is CASE SENSITIVE.
         self.textBox.bind("<Control-s>", self.controller.ask_save_file)
+        self.textBox.bind("<Control-S>", self.controller.ask_save_file)
     
     def refresh(self, event):
         self.textBox_font.configure(family=self.controller.app_settings["font_family"],

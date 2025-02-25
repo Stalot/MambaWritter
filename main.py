@@ -35,7 +35,7 @@ class App(ctk.CTk):
         
         self.device_logged_user_name: str = os.getlogin()
         self.user_files_directory: Path = self.FOLDER_PATHS["documents"]
-        self.current_file: Optional[Path] = None
+        self.current_file: Optional[Path] = Path("untitled.txt")
         self.unsaved_changes: bool = False
         self.file_initial_content: str = ""
         
@@ -68,7 +68,11 @@ class App(ctk.CTk):
         if len(sys.argv) > 1:
             try:
                 filepath: Path = Path(sys.argv[1]).absolute() # The target file path
+                self.current_file = filepath
                 self.wm_title(f"MambaWritter - {filepath.stem}")
+                
+                print(F"OPENING FILE: {self.current_file}")
+                
                 for line in iterate_file(filepath):
                     self.writtingpage_textbox.insert("end", line)
             except IOError as e:
@@ -87,11 +91,13 @@ class App(ctk.CTk):
         self.destroy() # Closes (destroy) window after everything
 
     def ask_save_file(self, event: Any = None):
+        print(F"SAVING FILE: {self.current_file}")
         if not self.current_file.exists():
             file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
                                         filetypes=[("Text file", "*.txt"),
                                                     ("Markdown file", "*.md")],
                                         initialdir=self.user_files_directory,
+                                        initialfile=self.current_file.stem,
                                         title="Save file")
             if file:
                 self.current_file = Path(file.name)
@@ -115,12 +121,15 @@ class App(ctk.CTk):
             self.current_file = Path(file.name)
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
             
+            print(F"OPENING FILE: {self.current_file}")
+            
             for line in iterate_file(file.name):
                 self.writtingpage_textbox.insert("end", line)
             self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
             self.unsaved_changes = False
 
     def new_file(self):
+        print("NEW FILE")
         if self.unsaved_changes: # Checks if the current file has unsaved changes...
             if messagebox.askyesno("Unsaved Changes",
                                    f"{self.device_logged_user_name}, wait!\nYour file has unsaved changes, do you want to create a new file anyway?"):
