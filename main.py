@@ -49,6 +49,7 @@ class App(ctk.CTk):
             frame.grid(row=0, column=0, sticky="nsew")
         
         self.writtingpage_textbox: ctk.CTkTextbox = self.frames[WrittingPage].textBox
+        self.writtingpage_textbox.edit_modified(False)
         
         self.show_frame(WrittingPage)
         self.open_file_on_start()
@@ -71,14 +72,11 @@ class App(ctk.CTk):
                 self.current_file = filepath
                 self.wm_title(f"MambaWritter - {filepath.stem}")
                 
-                print(F"OPENING FILE: {self.current_file}")
-                
                 for line in iterate_file(filepath):
                     self.writtingpage_textbox.insert("end", line)
-            except IOError as e:
+            except Exception as e:
                 messagebox.showerror("Error",
                                      F"Failed to open file. {e}")
-        # self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
 
     def closing_application(self) -> None:
         if self.writtingpage_textbox.edit_modified(): # Checks if the current file has unsaved changes!
@@ -88,7 +86,6 @@ class App(ctk.CTk):
         self.destroy() # Closes (destroy) window after everything
 
     def ask_save_file(self, event: Any = None) -> None:
-        print(F"SAVING FILE: {self.current_file}")
         if not self.current_file.exists():
             file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
                                         filetypes=[("Text file", "*.txt"),
@@ -105,8 +102,6 @@ class App(ctk.CTk):
             Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
         
         self.writtingpage_textbox.edit_modified(False)
-        #self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
-        #self.unsaved_changes = False
 
     def ask_open_file(self, event: Any = None) -> None:
         if self.writtingpage_textbox.edit_modified():
@@ -123,16 +118,11 @@ class App(ctk.CTk):
             self.current_file = Path(file.name)
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
             
-            print(F"OPENING FILE: {self.current_file}")
-            
             for line in iterate_file(file.name):
                 self.writtingpage_textbox.insert("end", line)
             self.writtingpage_textbox.edit_modified(False)
-            #self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
-            #self.unsaved_changes = False
 
     def new_file(self, event: Any = None) -> None:
-        print("NEW FILE")
         if self.writtingpage_textbox.edit_modified(): # Checks if the current file has unsaved changes...
             if not messagebox.askyesno("Unsaved Changes",
                                    f"{self.device_logged_user_name}, wait!\nYour file has unsaved changes, do you want to create a new file anyway?"):
@@ -143,8 +133,6 @@ class App(ctk.CTk):
     def clear_textbox_content(self) -> None:
         self.writtingpage_textbox.delete("0.0", "end")
         self.current_file = None
-        # self.file_initial_content = ""
-        # self.unsaved_changes = False
         self.writtingpage_textbox.edit_modified(False)
         self.wm_title("MambaWritter")
 

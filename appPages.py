@@ -80,9 +80,8 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.grid(row=1, column=0, sticky="nsew")
         
         self.textBox.bind("<Expose>", self.refresh)
-        # self.textBox.bind("<Key>", self.check_file_changes)
         
-        # Tkinter binding is CASE SENSITIVE.
+        # Not CASE SENSITIVE shortcut binding:
         self.controller.non_case_sensitive_bind(self.textBox,
                                                 ("Control", "s"),
                                                 self.controller.ask_save_file)
@@ -100,9 +99,3 @@ class WrittingPage(ctk.CTkFrame):
         self.textBox.focus_set()
         self.textBox.configure(font=self.textBox_font,
                                wrap=self.controller.app_settings["text_wrapping"])
-    
-    #def check_file_changes(self, event):
-    #    if self.controller.file_initial_content != self.textBox.get("0.0", "end").strip():
-    #        self.controller.unsaved_changes = True
-    #    else:
-    #        self.controller.unsaved_changes = False
