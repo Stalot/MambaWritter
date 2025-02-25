@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import webbrowser
 
 # ███████╗██╗     ███████╗███╗   ███╗███████╗███╗   ██╗████████╗███████╗
 # ██╔════╝██║     ██╔════╝████╗ ████║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
@@ -22,7 +21,7 @@ class OptionsComboBox(ctk.CTkFrame):
         self.optionsBox.grid(row=1, column=0)
     
     def current_selection(self) -> str:
-        return str(self.optionsBox.get())
+        return str(self.optionsBox.get()).lower()
     
     def set_default_value(self, value: str) -> None:
         self.optionsBox.set(str(value))
