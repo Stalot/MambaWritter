@@ -74,6 +74,7 @@ class App(ctk.CTk):
                 
                 for line in iterate_file(filepath):
                     self.writtingpage_textbox.insert("end", line)
+                self.writtingpage_textbox.edit_modified(False)
             except Exception as e:
                 messagebox.showerror("Error",
                                      F"Failed to open file. {e}")
