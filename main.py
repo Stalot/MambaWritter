@@ -83,7 +83,7 @@ class App(ctk.CTk):
         if self.writtingpage_textbox.edit_modified(): # Checks if the current file has unsaved changes!
             if messagebox.askyesno("Unsaved Changes",
                                    f"Hey {self.device_logged_user_name}, your file has unsaved changes! Do you want to save your work before closing?"):
-                self.ask_save_file()
+                self.save_file()
         self.destroy() # Closes (destroy) window after everything
 
     def save_file(self, event: Any = None) -> None:
@@ -99,7 +99,7 @@ class App(ctk.CTk):
                                                 ("Markdown file", "*.md")],
                                     initialdir=self.user_files_directory,
                                     initialfile=self.current_file.stem,
-                                    title="Save file")
+                                    title="Save as...")
         if file:
             self.current_file = Path(file.name)
             self.wm_title(f"MambaWritter - {self.current_file.stem}")
