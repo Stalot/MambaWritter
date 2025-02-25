@@ -36,8 +36,8 @@ class App(ctk.CTk):
         self.device_logged_user_name: str = os.getlogin()
         self.user_files_directory: Path = self.FOLDER_PATHS["documents"]
         self.current_file: Optional[Path] = Path("untitled.txt")
-        self.unsaved_changes: bool = False
-        self.file_initial_content: str = ""
+        #self.unsaved_changes: bool = False
+        #self.file_initial_content: str = ""
         
         ctk.set_appearance_mode(self.app_settings["appearance_mode"])
 
@@ -55,13 +55,13 @@ class App(ctk.CTk):
         
         self.protocol("WM_DELETE_WINDOW", self.closing_application)
 
-    def show_frame(self, frame_to_raise):
+    def show_frame(self, frame_to_raise) -> None:
         frame: ctk.CTkFrame = self.frames[frame_to_raise]
         if hasattr(frame, 'on_show'):
             frame.on_show()
         frame.tkraise()
     
-    def open_file_on_start(self):
+    def open_file_on_start(self) -> None:
         """
         Opens a file when the user uses "Open with..." on Windows.
         """
@@ -78,19 +78,16 @@ class App(ctk.CTk):
             except IOError as e:
                 messagebox.showerror("Error",
                                      F"Failed to open file. {e}")
-        self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
+        # self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
 
-    def closing_application(self):
-        if self.unsaved_changes: # Checks if the current file has unsaved changes!
+    def closing_application(self) -> None:
+        if self.writtingpage_textbox.edit_modified(): # Checks if the current file has unsaved changes!
             if messagebox.askyesno("Unsaved Changes",
                                    f"Hey {self.device_logged_user_name}, your file has unsaved changes! Do you want to save your work before closing?"):
-                if self.current_file.exists():
-                    Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
-                else:
-                    self.ask_save_file()
+                self.ask_save_file()
         self.destroy() # Closes (destroy) window after everything
 
-    def ask_save_file(self, event: Any = None):
+    def ask_save_file(self, event: Any = None) -> None:
         print(F"SAVING FILE: {self.current_file}")
         if not self.current_file.exists():
             file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
@@ -107,15 +104,20 @@ class App(ctk.CTk):
         else:
             Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
         
-        self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
-        self.unsaved_changes = False
+        self.writtingpage_textbox.edit_modified(False)
+        #self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
+        #self.unsaved_changes = False
 
-    def ask_open_file(self):
+    def ask_open_file(self, event: Any = None) -> None:
+        if self.writtingpage_textbox.edit_modified():
+            if not messagebox.askyesno("Unsaved Changes",
+                                "Your file has unsaved changes, are you sure you want to open a new file anyway?"):
+                return None
         file = ctk.filedialog.askopenfile(defaultextension="*.txt",
-                                   filetypes=[("Text file", "*.txt"),
+                                    filetypes=[("Text file", "*.txt"),
                                                 ("Markdown file", "*.md")],
-                                   initialdir=self.user_files_directory,
-                                   title="Open File")
+                                    initialdir=self.user_files_directory,
+                                    title="Open File")
         if file:
             self.writtingpage_textbox.delete("0.0", "end")
             self.current_file = Path(file.name)
@@ -125,24 +127,33 @@ class App(ctk.CTk):
             
             for line in iterate_file(file.name):
                 self.writtingpage_textbox.insert("end", line)
-            self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
-            self.unsaved_changes = False
+            self.writtingpage_textbox.edit_modified(False)
+            #self.file_initial_content = self.writtingpage_textbox.get("0.0", "end").strip()
+            #self.unsaved_changes = False
 
-    def new_file(self):
+    def new_file(self, event: Any = None) -> None:
         print("NEW FILE")
-        if self.unsaved_changes: # Checks if the current file has unsaved changes...
-            if messagebox.askyesno("Unsaved Changes",
+        if self.writtingpage_textbox.edit_modified(): # Checks if the current file has unsaved changes...
+            if not messagebox.askyesno("Unsaved Changes",
                                    f"{self.device_logged_user_name}, wait!\nYour file has unsaved changes, do you want to create a new file anyway?"):
-                self.clear_textbox_content()
-        else:
-            self.clear_textbox_content()
+                return None
+        self.writtingpage_textbox.edit_modified(False)
+        self.clear_textbox_content()
 
-    def clear_textbox_content(self):
+    def clear_textbox_content(self) -> None:
         self.writtingpage_textbox.delete("0.0", "end")
         self.current_file = None
-        self.file_initial_content = ""
-        self.unsaved_changes = False
+        # self.file_initial_content = ""
+        # self.unsaved_changes = False
+        self.writtingpage_textbox.edit_modified(False)
         self.wm_title("MambaWritter")
+
+    def non_case_sensitive_bind(self, tk_object: Any, sequence: tuple[str, str] = ("Control", "a"), command: Any = None) -> None:
+        upper_sequence_string: str = f"<{sequence[0].capitalize()}-{sequence[1].upper()}>"
+        lower_sequence_string: str = f"<{sequence[0].capitalize()}-{sequence[1].lower()}>"
+        tk_object.bind(upper_sequence_string, command)
+        tk_object.bind(lower_sequence_string, command)
+        
 
 app = App()
 app.mainloop()
