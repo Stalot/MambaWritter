@@ -68,7 +68,7 @@ class WrittingPage(ctk.CTkFrame):
         self.controller = controller
         
         buttons = [["New File", controller.new_file],
-                   ["Save File", controller.ask_save_file],
+                   ["Save File", controller.save_file],
                    ["Open File", controller.ask_open_file],
                    ["Settings", lambda: controller.show_frame(Settings)]
                    ]
@@ -83,13 +83,16 @@ class WrittingPage(ctk.CTkFrame):
         
         # Not CASE SENSITIVE shortcut binding:
         self.controller.non_case_sensitive_bind(self.textBox,
-                                                ("Control", "s"),
-                                                self.controller.ask_save_file)
+                                                "Control-s",
+                                                self.controller.save_file)
         self.controller.non_case_sensitive_bind(self.textBox,
-                                                ("Control", "o"),
+                                                "Control-Shift-s",
+                                                self.controller.ask_save_as)
+        self.controller.non_case_sensitive_bind(self.textBox,
+                                                "Control-o",
                                                 self.controller.ask_open_file)
         self.controller.non_case_sensitive_bind(self.textBox,
-                                                ("Control", "n"),
+                                                "Control-n",
                                                 self.controller.new_file)
         
     

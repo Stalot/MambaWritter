@@ -86,23 +86,25 @@ class App(ctk.CTk):
                 self.ask_save_file()
         self.destroy() # Closes (destroy) window after everything
 
-    def ask_save_file(self, event: Any = None) -> None:
+    def save_file(self, event: Any = None) -> None:
         if not self.current_file.exists():
-            file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
-                                        filetypes=[("Text file", "*.txt"),
-                                                    ("Markdown file", "*.md")],
-                                        initialdir=self.user_files_directory,
-                                        initialfile=self.current_file.stem,
-                                        title="Save file")
-            if file:
-                self.current_file = Path(file.name)
-                self.wm_title(f"MambaWritter - {self.current_file.stem}")
-                
-                Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
+            self.ask_save_as()
         else:
             Path(self.current_file.absolute()).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
-        
         self.writtingpage_textbox.edit_modified(False)
+
+    def ask_save_as(self, event: Any = None) -> None:
+        file = ctk.filedialog.asksaveasfile(defaultextension="*.txt",
+                                    filetypes=[("Text file", "*.txt"),
+                                                ("Markdown file", "*.md")],
+                                    initialdir=self.user_files_directory,
+                                    initialfile=self.current_file.stem,
+                                    title="Save file")
+        if file:
+            self.current_file = Path(file.name)
+            self.wm_title(f"MambaWritter - {self.current_file.stem}")
+            
+            Path(file.name).write_text(self.writtingpage_textbox.get('0.0', 'end').strip(), "utf-8")
 
     def ask_open_file(self, event: Any = None) -> None:
         if self.writtingpage_textbox.edit_modified():
@@ -137,9 +139,13 @@ class App(ctk.CTk):
         self.writtingpage_textbox.edit_modified(False)
         self.wm_title("MambaWritter")
 
-    def non_case_sensitive_bind(self, tk_object: Any, sequence: tuple[str, str] = ("Control", "a"), command: Any = None) -> None:
-        upper_sequence_string: str = f"<{sequence[0].capitalize()}-{sequence[1].upper()}>"
-        lower_sequence_string: str = f"<{sequence[0].capitalize()}-{sequence[1].lower()}>"
+    def non_case_sensitive_bind(self, tk_object: Any, sequence: str = "Control-a", command: Any = None) -> None:
+        separator = "-"
+        sequence_list: list[str] = sequence.split("-")
+        
+        upper_sequence_string: str = "<" + separator.join((s.upper() if s.isalpha() and len(s) == 1 else s.capitalize() for s in sequence_list)) + ">"
+        lower_sequence_string: str = "<" + separator.join((s.lower() if s.isalpha() and len(s) == 1 else s.capitalize() for s in sequence_list)) + ">"
+        
         tk_object.bind(upper_sequence_string, command)
         tk_object.bind(lower_sequence_string, command)
         
