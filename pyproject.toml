@@ -1,0 +1,35 @@
+[project]
+name = "MambaWritter"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Orly Neto", email = "orly.neto@proton.me" }
+]
+dependencies = [
+    "flet>=0.85.2"
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli>=0.85.2",
+    "flet-desktop>=0.85.2",
+    "flet-web>=0.85.2",
+]
+
+[tool.flet]
+org = "com.mycompany"
+product = "mambawritter"
+company = "Flet"
+copyright = "Copyright (C) 2023-2026 by Orly Neto"
+
+[tool.flet.app]
+path = "src"
+
+[tool.flet.android.permission]
+"android.permission.READ_EXTERNAL_STORAGE" = true
+"android.permission.WRITE_EXTERNAL_STORAGE" = true
+
+[tool.flet.android]
+split_per_abi = true

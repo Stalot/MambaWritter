@@ -1,21 +1,42 @@
 import flet as ft
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 def main(page: ft.Page):
-    label = ft.Text("Hello, world!", size=50)
-
-    page.add(
-        ft.SafeArea(
-            expand=True,                                               content=ft.Container(
-                content=label,
-                alignment=ft.Alignment.CENTER,
-            ),
-        )
+    page.padding = 0
+    page.spacing = 0
+    
+    text_field = ft.TextField(
+        expand=True,
+        border=ft.InputBorder.NONE,
+        hint_text="Type here...",
+        text_size=16,
+        multiline=True,
+    )
+    top_bar = ft.Row(
+            tight=True,
+            controls=[
+                ft.Container(
+                    ft.Row(
+                        controls=[
+                            ft.Text("MambaWritter")
+                            ]
+                        )
+                    )
+                ]
+            )
+    main_container = ft.Container(
+        expand=True,
+        content=ft.Column(
+            expand=True,
+            controls=[
+                top_bar,
+                text_field
+            ],
+        ),
+    )
+    page.add(ft.SafeArea(
+                expand=True,
+                content=main_container,
+            )
     )
 
-
-if __name__ == "__main__":
-    ft.run(main)
+ft.run(main)
