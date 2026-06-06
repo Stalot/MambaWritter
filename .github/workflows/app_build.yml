@@ -1,0 +1,68 @@
+# docs: https://docs.flet.dev/publish/#github-actions/
+
+name: Build Flet App
+
+on:
+  push:
+    branches:
+      - build_test
+  release:
+    types: [published]      
+
+env:
+  UV_PYTHON: 3.11
+  PYTHONUTF8: 1
+
+  # https://docs.flet.dev/reference/environment-variables
+  FLET_CLI_NO_RICH_OUTPUT: 1
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # -------- Android --------
+          - name: apk
+            runner: ubuntu-latest
+            build_cmd: "flet build apk"
+            artifact_path: build/apk
+            needs_linux_deps: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Linux dependencies
+        if: matrix.needs_linux_deps
+        shell: bash
+        run: |
+          sudo apt update --allow-releaseinfo-change
+          sudo apt-get install -y --no-install-recommends \
+            clang ninja-build libgtk-3-dev libasound2-dev libmpv-dev mpv \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+            gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 \
+            gstreamer1.0-qt5 gstreamer1.0-pulseaudio pkg-config libsecret-1-0 libsecret-1-dev
+          sudo apt-get clean
+
+
+      - name: Build app
+        shell: bash
+        run: |
+          #uv pip install .
+          uv run ${{ matrix.build_cmd }} --yes --verbose
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: ${{ matrix.name }}-build-artifact
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+          overwrite: false
+
