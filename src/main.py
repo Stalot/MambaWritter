@@ -12,11 +12,24 @@ def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
+    #async def go_to(route: str = "/"):
+    #await page.push_route(route)
+
     def home_view() -> ft.View:
+        async def goto_editor():
+            await page.push_route("/editor")
+
         appBar = ft.AppBar(
-            title="MambaWritter"
+            title="MambaWritter",
+            actions=[
+                ft.TextButton(
+                    "New file",
+                    on_click=goto_editor
+                ),
+            ],
         )
         view = ft.View(
+            route="/",
             controls=[
                 ft.SafeArea(
                     content=ft.Text("Hello, world!")
@@ -26,12 +39,46 @@ def main(page: ft.Page):
         view.appbar = appBar
         return view
 
+    def editor_view() -> ft.View:
+        app_bar = ft.AppBar()
+        view = ft.View(
+            route="/editor",
+            controls=[
+                ft.SafeArea(
+                    expand=True,
+                    content=ft.Column(
+                            expand=True,
+                            controls=[
+                                ft.Row(
+                                    controls=[
+                                        ft.TextField(
+                                            expand=True,
+                                            border=ft.InputBorder.NONE,
+                                            hint_text="Title",
+                                        ),
+                                    ],
+                                ),
+                                ft.TextField(
+                                    expand=True,
+                                    border=ft.InputBorder.NONE,
+                                    text_size=16,
+                                    multiline=True,
+                                    hint_text="...",
+                                )
+                            ]
+                    )
+                )
+            ]
+        )
+        view.appbar = app_bar
+        return view
+
     def route_change():
         page.views.clear()
         page.views.append(home_view())
-        #match page.route:
-        #    case "/editor":
-        #        page.views.append(editor_view())
+        match page.route:
+            case "/editor":
+                page.views.append(editor_view())
 
     async def view_pop(e):
         if e.view is not None:
