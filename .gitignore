@@ -5,3 +5,4 @@ junk/
 pyinstaller_config_settings.json
 custom_app_settings.json
 *.sh
+storage/
