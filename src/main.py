@@ -12,9 +12,6 @@ def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
-    #async def go_to(route: str = "/"):
-    #await page.push_route(route)
-
     def home_view() -> ft.View:
         async def goto_editor():
             await page.push_route("/editor")
@@ -47,25 +44,25 @@ def main(page: ft.Page):
                 ft.SafeArea(
                     expand=True,
                     content=ft.Column(
-                            expand=True,
-                            controls=[
-                                ft.Row(
-                                    controls=[
-                                        ft.TextField(
-                                            expand=True,
-                                            border=ft.InputBorder.NONE,
-                                            hint_text="Title",
-                                        ),
-                                    ],
-                                ),
-                                ft.TextField(
-                                    expand=True,
-                                    border=ft.InputBorder.NONE,
-                                    text_size=16,
-                                    multiline=True,
-                                    hint_text="...",
-                                )
-                            ]
+                        expand=True,
+                        controls=[
+                            ft.Row(
+                                controls=[
+                                    ft.TextField(
+                                        expand=True,
+                                        border=ft.InputBorder.NONE,
+                                        hint_text="Title",
+                                    ),
+                                ],
+                            ),
+                            ft.TextField(
+                                expand=True,
+                                border=ft.InputBorder.NONE,
+                                text_size=16,
+                                multiline=True,
+                                hint_text="...",
+                            )
+                        ]
                     )
                 )
             ]
