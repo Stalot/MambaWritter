@@ -8,20 +8,33 @@ APP_DATA_TEMP_PATH: Path = Path(os.getenv("FLET_APP_STORAGE_TEMP"))
 APP_DATA_PATH.mkdir(parents=True, exist_ok=True)
 APP_DATA_TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
     def home_view() -> ft.View:
         async def goto_editor():
             await page.push_route("/editor")
+        async def new_file(e):
+            page.session.store.set("textfield_default_value", "")
+            await goto_editor()
+        async def open_file(e):
+            file_path: Path = e.control.data
+            with open(file_path, "r") as f:
+                content: str = f.read()
+            page.session.store.set("textfield_default_value", content)
+            await goto_editor()
+
+        def user_files():
+            path = APP_DATA_PATH / "user"
+            return [file for file in path.glob("*")]
 
         appBar = ft.AppBar(
             title="MambaWritter",
             actions=[
                 ft.TextButton(
                     "New file",
-                    on_click=goto_editor
+                    on_click=new_file
                 ),
             ],
         )
@@ -29,7 +42,15 @@ def main(page: ft.Page):
             route="/",
             controls=[
                 ft.SafeArea(
-                    content=ft.Text("Hello, world!")
+                    content=ft.Column(
+                        controls=[
+                            ft.TextButton(
+                                file.name,
+                                data=file.resolve(),
+                                on_click=open_file
+                            ) for file in user_files()
+                        ]
+                    )
                 )
             ]
         )
@@ -37,6 +58,9 @@ def main(page: ft.Page):
         return view
 
     def editor_view() -> ft.View:
+        def default_value() -> str:
+            return page.session.store.get("textfield_default_value")
+
         app_bar = ft.AppBar()
         view = ft.View(
             route="/editor",
@@ -61,6 +85,7 @@ def main(page: ft.Page):
                                 text_size=16,
                                 multiline=True,
                                 hint_text="...",
+                                value=default_value()
                             )
                         ]
                     )
