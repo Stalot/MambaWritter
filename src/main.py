@@ -14,6 +14,10 @@ async def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
+    def rebuild_current_view(new_view):
+        page.views[-1] = new_view
+        page.update()
+        
     def home_view() -> ft.View:
         async def goto_editor():
             await page.push_route("/editor")
@@ -31,6 +35,39 @@ async def main(page: ft.Page):
             page.session.store.set("title", file_path.stem)     
             await goto_editor()
 
+        async def delete_file(e):
+            file_path: Path = Path(e.control.data)
+
+            async def proceed(e):
+                page.pop_dialog()
+                file_path.unlink(missing_ok=True)
+                new_view = home_view()
+                rebuild_current_view(new_view)
+
+            confirm_delete_dialog = ft.AlertDialog(
+                modal=True,
+                title=ft.Text(
+                    "Delete file"
+                ),
+                content=ft.Text(
+                    f"Do you really want to delete '{file_path.name}'?"
+                ),
+                actions=[
+                    ft.TextButton(
+                        "Yes",
+                        on_click=proceed
+                    ),
+                    ft.TextButton(
+                        "No",
+                        on_click=lambda e: page.pop_dialog()
+                    ),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END
+            )
+
+            page.show_dialog(confirm_delete_dialog)
+
+
         def user_files():
             path: Path = USER_DIR
             return [file for file in path.glob("*")]
@@ -44,6 +81,7 @@ async def main(page: ft.Page):
                 ),
             ],
         )
+
         view = ft.View(
             route="/",
             controls=[
@@ -52,12 +90,25 @@ async def main(page: ft.Page):
                         controls=[
                             ft.Row(
                                 controls=[
-                                    ft.TextButton(
-                                        file.name,
-                                        data=file.resolve(),
-                                        on_click=open_file
-                                    )
-                                ]
+                                    ft.Container(
+                                        expand=True,
+                                        alignment=ft.Alignment.CENTER_LEFT,
+                                        content=ft.TextButton(
+                                                file.name,
+                                                data=file.resolve(),
+                                                on_click=open_file
+                                            ),
+                                    ),
+                                    ft.Container(
+                                        expand=True,
+                                        alignment=ft.Alignment.CENTER_RIGHT,
+                                        content=ft.IconButton(
+                                                ft.Icons.DELETE,
+                                                data=file.resolve(),
+                                            on_click=delete_file, 
+                                            ),
+                                    ),
+                                ],
                             ) for file in user_files()
                         ]
                     )
