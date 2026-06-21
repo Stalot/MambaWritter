@@ -38,8 +38,9 @@ async def main(page: ft.Page):
         async def delete_file(e):
             file_path: Path = Path(e.control.data)
 
-            async def proceed(e):
+            def proceed(e):
                 page.pop_dialog()
+                page.update()
                 file_path.unlink(missing_ok=True)
                 new_view = home_view()
                 rebuild_current_view(new_view)
