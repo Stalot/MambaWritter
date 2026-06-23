@@ -16,6 +16,8 @@ async def main(page: ft.Page):
     page.spacing = 2
 
     def home_view() -> ft.View:
+        async def event_goto_editor(e):
+            await page.push_route("/editor")
         async def event_pop_file(e):
             def delete(file_path: Path):
                file_path.unlink(missing_ok=True)
@@ -55,7 +57,7 @@ async def main(page: ft.Page):
             actions=[
                 ft.TextButton(
                     "New file",
-                    #on_click=new_file
+                    on_click=event_goto_editor
                 ),
             ],
         )
@@ -72,9 +74,43 @@ async def main(page: ft.Page):
         return view
 
     def editor_view() -> ft.View:
+        text_box = ft.TextField(
+            expand=True,
+            border=ft.InputBorder.NONE,
+            text_size=16,
+            multiline=True,
+            hint_text="Title",
+        )
+        file_title = ft.TextField(
+            expand=True,
+            border=ft.InputBorder.NONE,
+            text_size=16,
+            hint_text="...",
+        )
+        editor = ft.Container(
+            expand=True,
+            alignment=ft.Alignment.TOP_LEFT,
+            content=ft.Column(
+                expand=True,
+                controls=[
+                    ft.Row(
+                        controls=[
+                            file_title,
+                        ]
+                    ),
+                    text_box
+                ]
+            )
+        )
+        app_bar: ft.AppBar = ft.AppBar()
         view = ft.View(
             route="/editor",
-            controls=[]
+            controls=[
+                ft.SafeArea(
+                    expand=True,
+                    content=editor
+                )
+            ]
         )
         view.appbar = app_bar
         return view
