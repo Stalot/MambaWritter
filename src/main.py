@@ -15,15 +15,17 @@ async def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
-    page.editor_data: dict[str, str] = {
+    page.editor_data: dict[str, str | Path | None] = {
         "file_name": "",
-        "text": ""
+        "text": "",
+        "current_path": None
     }
 
     def home_view() -> ft.View:
         async def event_new_file(e):
-            page.editor_data["file_name"] = ""
+            page.editor_data["file_name"] = "Untitled"
             page.editor_data["text"] = ""
+            page.editor_data["current_path"] = None
             await page.push_route("/editor")
         async def event_open_file(e):
             file_path: Path = e.control.data
@@ -31,6 +33,7 @@ async def main(page: ft.Page):
                 text: str = f.read()
             page.editor_data["file_name"] = file_path.stem
             page.editor_data["text"] = text
+            page.editor_data["current_path"] = file_path
             await page.push_route("/editor")
         async def event_pop_file(e):
             def delete(file_path: Path):
@@ -97,20 +100,49 @@ async def main(page: ft.Page):
         return view
 
     def editor_view() -> ft.View:
+        async def event_save_changes(e):
+            def update_file(file_path: Path):
+                with open(file_path, "w") as f:
+                    f.write(textbox_text)
+            def create_file():
+                title: str = file_title.value
+                if len(title) < 1: # Empty
+                    title = "Untitled"
+                new_path: Path = USER_DIR / f"{title}.txt"
+                with open(new_path, "w") as f:
+                    f.write(textbox_text)
+            file_path: Path | None = page.editor_data["current_path"]
+            textbox_text: str = e.control.value
+            if isinstance(file_path, Path):
+                await asyncio.to_thread(update_file, file_path)
+            else:
+                await asyncio.to_thread(create_file)
+        async def event_rename_file(e):
+            old_path: Path | None = page.editor_data["current_path"]
+            title: str = e.control.value
+            if len(title) < 1: # Empty
+                title = "Untitled"
+            new_path = USER_DIR / f"{title}.txt"
+            if isinstance(old_path, Path):
+                if old_path.exists():
+                    os.replace(old_path, new_path)
+                    page.editor_data["current_path"] = new_path
         text_box = ft.TextField(
             expand=True,
             border=ft.InputBorder.NONE,
             text_size=16,
             multiline=True,
             hint_text="...",
-            value=page.editor_data["text"]
+            value=page.editor_data["text"],
+            on_change=event_save_changes,
         )
         file_title = ft.TextField(
             expand=True,
             border=ft.InputBorder.NONE,
             text_size=16,
             hint_text="Title",
-            value=page.editor_data["file_name"]
+            value=page.editor_data["file_name"],
+            on_blur=event_rename_file
         )
         editor = ft.Container(
             expand=True,
