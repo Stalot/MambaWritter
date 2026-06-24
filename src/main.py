@@ -15,8 +15,22 @@ async def main(page: ft.Page):
     page.padding = 4
     page.spacing = 2
 
+    page.editor_data: dict[str, str] = {
+        "file_name": "",
+        "text": ""
+    }
+
     def home_view() -> ft.View:
-        async def event_goto_editor(e):
+        async def event_new_file(e):
+            page.editor_data["file_name"] = ""
+            page.editor_data["text"] = ""
+            await page.push_route("/editor")
+        async def event_open_file(e):
+            file_path: Path = e.control.data
+            with open(file_path, "r") as f:
+                text: str = f.read()
+            page.editor_data["file_name"] = file_path.stem
+            page.editor_data["text"] = text
             await page.push_route("/editor")
         async def event_pop_file(e):
             def delete(file_path: Path):
@@ -29,12 +43,20 @@ async def main(page: ft.Page):
             await asyncio.to_thread(delete, file_path)
             user_files.controls.remove(row)
             
-        user_files: ft.ListView = ft.ListView()
+        user_files: ft.ListView = ft.ListView(
+            spacing=10,
+            padding=20,
+            expand=True,
+        )
         for file in USER_DIR.glob("*"):
             row = ft.Row()
             row.controls.append(
                 ft.Container(
-                    content=ft.TextButton(file.name)
+                    content=ft.TextButton(
+                        file.name,
+                        data=file.resolve(),
+                        on_click=event_open_file
+                    )
                 )
             )
             row.controls.append(
@@ -57,7 +79,7 @@ async def main(page: ft.Page):
             actions=[
                 ft.TextButton(
                     "New file",
-                    on_click=event_goto_editor
+                    on_click=event_new_file
                 ),
             ],
         )
@@ -66,6 +88,7 @@ async def main(page: ft.Page):
             route="/",
             controls=[
                 ft.SafeArea(
+                    expand=True,
                     content=user_files
                 ),
             ]
@@ -79,13 +102,15 @@ async def main(page: ft.Page):
             border=ft.InputBorder.NONE,
             text_size=16,
             multiline=True,
-            hint_text="Title",
+            hint_text="...",
+            value=page.editor_data["text"]
         )
         file_title = ft.TextField(
             expand=True,
             border=ft.InputBorder.NONE,
             text_size=16,
-            hint_text="...",
+            hint_text="Title",
+            value=page.editor_data["file_name"]
         )
         editor = ft.Container(
             expand=True,
