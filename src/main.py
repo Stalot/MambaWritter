@@ -1,181 +1,50 @@
 import flet as ft
-import os
-from pathlib import Path
-import asyncio
 
-APP_DATA_PATH: Path = Path(os.getenv("FLET_APP_STORAGE_DATA"))
-APP_DATA_TEMP_PATH: Path = Path(os.getenv("FLET_APP_STORAGE_TEMP"))
-USER_DIR: Path = APP_DATA_PATH / "user"
-
-APP_DATA_PATH.mkdir(parents=True, exist_ok=True)
-APP_DATA_TEMP_PATH.mkdir(parents=True, exist_ok=True)
-USER_DIR.mkdir(parents=True, exist_ok=True)
-
-async def main(page: ft.Page):
-    page.padding = 4
-    page.spacing = 2
-
-    page.editor_data: dict[str, str | Path | None] = {
-        "file_name": "",
-        "text": "",
-        "current_path": None
-    }
-
-    def home_view() -> ft.View:
-        async def event_new_file(e):
-            page.editor_data["file_name"] = "Untitled"
-            page.editor_data["text"] = ""
-            page.editor_data["current_path"] = None
-            await page.push_route("/editor")
-        async def event_open_file(e):
-            file_path: Path = e.control.data
-            with open(file_path, "r") as f:
-                text: str = f.read()
-            page.editor_data["file_name"] = file_path.stem
-            page.editor_data["text"] = text
-            page.editor_data["current_path"] = file_path
-            await page.push_route("/editor")
-        async def event_pop_file(e):
-            def delete(file_path: Path):
-               file_path.unlink(missing_ok=True)
-            text_button = e.control
-            text_button.disabled = True
-            event_data: dict[str, ft.Row | Path] = e.control.data
-            row: ft.Row = event_data["row"]
-            file_path: Path = event_data["file_path"]
-            await asyncio.to_thread(delete, file_path)
-            user_files.controls.remove(row)
-            
-        user_files: ft.ListView = ft.ListView(
-            spacing=10,
+def main(page: ft.Page):
+    def _view_template(
+            route: str,
+            content
+        ):
+        return ft.View(
+            route=route,
             padding=20,
-            expand=True,
-        )
-        for file in USER_DIR.glob("*"):
-            row = ft.Row()
-            row.controls.append(
-                ft.Container(
-                    content=ft.TextButton(
-                        file.name,
-                        data=file.resolve(),
-                        on_click=event_open_file
-                    )
-                )
-            )
-            row.controls.append(
-                ft.Container(
-                    alignment=ft.Alignment.CENTER_RIGHT,
-                    content=ft.TextButton(
-                        "Delete",
-                        data={
-                            "row": row,
-                            "file_path": Path(file.resolve())
-                        },
-                        on_click=event_pop_file
-                    )
-                )
-            )
-            user_files.controls.append(row)
-
-        appBar = ft.AppBar(
-            title="MambaWritter",
-            actions=[
-                ft.TextButton(
-                    "New file",
-                    on_click=event_new_file
-                ),
-            ],
-        )
-
-        view = ft.View(
-            route="/",
             controls=[
                 ft.SafeArea(
                     expand=True,
-                    content=user_files
-                ),
+                    content=content,
+                )
             ]
         )
-        view.appbar = appBar
-        return view
 
-    def editor_view() -> ft.View:
-        async def event_save_changes(e):
-            def update_file(file_path: Path):
-                with open(file_path, "w") as f:
-                    f.write(textbox_text)
-            def create_file():
-                title: str = file_title.value
-                if len(title) < 1: # Empty
-                    title = "Untitled"
-                new_path: Path = USER_DIR / f"{title}.txt"
-                with open(new_path, "w") as f:
-                    f.write(textbox_text)
-            file_path: Path | None = page.editor_data["current_path"]
-            textbox_text: str = e.control.value
-            if isinstance(file_path, Path):
-                await asyncio.to_thread(update_file, file_path)
-            else:
-                await asyncio.to_thread(create_file)
-        async def event_rename_file(e):
-            old_path: Path | None = page.editor_data["current_path"]
-            title: str = e.control.value
-            if len(title) < 1: # Empty
-                title = "Untitled"
-            new_path = USER_DIR / f"{title}.txt"
-            if isinstance(old_path, Path):
-                if old_path.exists():
-                    os.replace(old_path, new_path)
-                    page.editor_data["current_path"] = new_path
-        text_box = ft.TextField(
-            expand=True,
-            border=ft.InputBorder.NONE,
-            text_size=16,
-            multiline=True,
-            hint_text="...",
-            value=page.editor_data["text"],
-            on_change=event_save_changes,
+    def home_view():
+        content = ft.Column(
+            controls=[
+                ft.Text("Hello, world!"),
+                ft.Button(
+                    "Change",
+                    on_click=lambda e: page.navigate("/editor"),
+                )
+            ]
         )
-        file_title = ft.TextField(
+        return _view_template("/", content)
+
+    def editor_view():
+        content = ft.Container(
             expand=True,
-            border=ft.InputBorder.NONE,
-            text_size=16,
-            hint_text="Title",
-            value=page.editor_data["file_name"],
-            on_blur=event_rename_file
-        )
-        editor = ft.Container(
-            expand=True,
-            alignment=ft.Alignment.TOP_LEFT,
-            content=ft.Column(
+            content=ft.TextField(
                 expand=True,
-                controls=[
-                    ft.Row(
-                        controls=[
-                            file_title,
-                        ]
-                    ),
-                    text_box
-                ]
+                hint_text="Write your ideas here...",
+                multiline=True,
+                border=ft.NoInputBorder(),
             )
         )
-        app_bar: ft.AppBar = ft.AppBar()
-        view = ft.View(
-            route="/editor",
-            controls=[
-                ft.SafeArea(
-                    expand=True,
-                    content=editor
-                )
-            ]
-        )
-        view.appbar = app_bar
-        return view
+        return _view_template("/editor", content)
 
     def route_change():
         page.views.clear()
-        page.views.append(home_view())
         match page.route:
+            case "/":
+                page.views.append(home_view())
             case "/editor":
                 page.views.append(editor_view())
 
@@ -184,7 +53,7 @@ async def main(page: ft.Page):
             page.views.remove(e.view)
             top_view = page.views[-1]
             await page.push_route(top_view.route)
-    
+
     page.on_route_change = route_change
     page.on_view_pop = view_pop
 
