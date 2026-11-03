@@ -1,63 +1,95 @@
 import flet as ft
+from pathlib import Path
+import os
 
-def main(page: ft.Page):
-    def _view_template(
-            route: str,
-            content
-        ):
-        return ft.View(
-            route=route,
-            padding=20,
-            controls=[
-                ft.SafeArea(
-                    expand=True,
-                    content=content,
-                )
+FLET_APP_STORAGE_DATA = os.getenv("FLET_APP_STORAGE_DATA")
+USER_DATA_PATH = FLET_APP_STORAGE_DATA+"/user"
+
+@ft.component
+def HomeView():
+    app_bar = ft.AppBar(
+        title=ft.Text("Your files."),
+    )
+    ft.context.page.appbar = app_bar
+    ft.context.page.update()
+
+    def get_user_files():
+        files = []
+        for f in os.scandir(USER_DATA_PATH):
+            files.append({
+                "file_name": f.name,
+                "path": f.path
+            })
+        return files
+
+    async def open_file(e):
+        ft.context.page.file_path = e.control.data
+        await ft.context.page.push_route("/editor")
+
+    content = ft.Column(
+        controls=[
+            ft.TextButton(
+                file["file_name"],
+                on_click=open_file,
+                data=file["path"],
+            ) for file in get_user_files()
+        ]
+    )
+    return content
+
+def EditorView():
+    app_bar = ft.AppBar(
+        leading=ft.Icon(ft.Icons.MENU),                            title=ft.Text("Untitled.txt"),
+        actions=[
+            ft.IconButton(
+                ft.Icons.SEARCH,
+                on_click=lambda e: ft.context.page.navigate("/")
+            ),
+            ft.IconButton(ft.Icons.MORE_VERT),
+        ],                                                     )
+    ft.context.page.appbar = app_bar
+    ft.context.page.update()
+
+    def default_text():
+        text: str = ""
+        with open(ft.context.page.file_path, "r") as f:
+            text = f.read()
+        return text
+
+    textbox = ft.TextField(
+        value=default_text(),
+        expand=True,
+        hint_text="Write your ideas here...",
+        multiline=True,
+        border=ft.NoInputBorder(),
+    )
+
+    content = ft.Column(
+        expand=True,
+        controls=[
+            textbox,
+        ]
+    )
+    return content
+
+@ft.component
+def App():
+    ft.context.page.padding=20
+    return ft.SafeArea(
+        expand=True,
+        content=ft.Router(
+            [
+                ft.Route(
+                    index=True,
+                    component=HomeView
+                ),
+                ft.Route(
+                    path="editor",
+                    component=EditorView,
+                ),
             ]
-        )
-
-    def home_view():
-        content = ft.Column(
-            controls=[
-                ft.Text("Hello, world!"),
-                ft.Button(
-                    "Change",
-                    on_click=lambda e: page.navigate("/editor"),
-                )
-            ]
-        )
-        return _view_template("/", content)
-
-    def editor_view():
-        content = ft.Container(
-            expand=True,
-            content=ft.TextField(
-                expand=True,
-                hint_text="Write your ideas here...",
-                multiline=True,
-                border=ft.NoInputBorder(),
-            )
-        )
-        return _view_template("/editor", content)
-
-    def route_change():
-        page.views.clear()
-        match page.route:
-            case "/":
-                page.views.append(home_view())
-            case "/editor":
-                page.views.append(editor_view())
-
-    async def view_pop(e):
-        if e.view is not None:
-            page.views.remove(e.view)
-            top_view = page.views[-1]
-            await page.push_route(top_view.route)
-
-    page.on_route_change = route_change
-    page.on_view_pop = view_pop
-
-    route_change()
+        ),
+    )
 
 if __name__ == "__main__":
-    ft.run(main)
+    ft.run(lambda page: page.render(App))
