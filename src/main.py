@@ -3,61 +3,70 @@ from pathlib import Path
 import os
 
 FLET_APP_STORAGE_DATA = os.getenv("FLET_APP_STORAGE_DATA")
-USER_DATA_PATH = FLET_APP_STORAGE_DATA+"/user"
+USER_DATA_PATH = os.path.join(FLET_APP_STORAGE_DATA, "user")
+
+class UserFiles(ft.Container):
+    def __init__(self):
+        self.files = ft.ListView(
+            controls=[
+                ft.Text("No files here...")
+            ]
+        )
+        self.reload()
+        super().__init__(
+            content=self.files
+        )
+
+    def reload(self):
+        def file_template(file_data):
+            return ft.Text(file_data.name)
+        data_found = []
+        for item in self.get_dir_content(USER_DATA_PATH):
+            if item:
+                data_found.append(file_template(item))
+        if data_found:
+            self.files.controls = data_found
+
+    def get_dir_content(self, path):
+        return os.scandir(path)
 
 @ft.component
-def HomeView():
+def FileManagerView():
     app_bar = ft.AppBar(
-        title=ft.Text("Your files."),
+        #leading=ft.Icon(ft.Icons.MENU),
+        title=ft.Text("File Manager"),
+        actions=[
+            ft.IconButton(
+                ft.Icons.ADD,
+                on_click=lambda e: ft.context.page.navigate("/")
+            ),
+        ],
     )
     ft.context.page.appbar = app_bar
     ft.context.page.update()
+    return UserFiles()
 
-    def get_user_files():
-        files = []
-        for f in os.scandir(USER_DATA_PATH):
-            files.append({
-                "file_name": f.name,
-                "path": f.path
-            })
-        return files
-
-    async def open_file(e):
-        ft.context.page.file_path = e.control.data
-        await ft.context.page.push_route("/editor")
-
-    content = ft.Column(
-        controls=[
-            ft.TextButton(
-                file["file_name"],
-                on_click=open_file,
-                data=file["path"],
-            ) for file in get_user_files()
-        ]
-    )
-    return content
-
+@ft.component
 def EditorView():
     app_bar = ft.AppBar(
         leading=ft.Icon(ft.Icons.MENU),                            title=ft.Text("Untitled.txt"),
         actions=[
             ft.IconButton(
                 ft.Icons.SEARCH,
-                on_click=lambda e: ft.context.page.navigate("/")
+                on_click=lambda e: ft.context.page.navigate("/test/435")
             ),
             ft.IconButton(ft.Icons.MORE_VERT),
         ],                                                     )
     ft.context.page.appbar = app_bar
-    ft.context.page.update()
 
-    def default_text():
-        text: str = ""
-        with open(ft.context.page.file_path, "r") as f:
-            text = f.read()
-        return text
+    #def default_text():
+    #    text: str = ""
+    #    with open(ft.context.page.file_path, "r") as f:
+    #        text = f.read()
+    #    return text
 
     textbox = ft.TextField(
-        value=default_text(),
+            #value=default_text(),
         expand=True,
         hint_text="Write your ideas here...",
         multiline=True,
@@ -81,11 +90,11 @@ def App():
             [
                 ft.Route(
                     index=True,
-                    component=HomeView
+                    component=EditorView
                 ),
                 ft.Route(
-                    path="editor",
-                    component=EditorView,
+                    path="test/:id",
+                    component=FileManagerView,
                 ),
             ]
         ),
