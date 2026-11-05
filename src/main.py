@@ -33,7 +33,6 @@ class UserFiles(ft.Container):
 @ft.component
 def FileManagerView():
     app_bar = ft.AppBar(
-        #leading=ft.Icon(ft.Icons.MENU),
         title=ft.Text("File Manager"),
         actions=[
             ft.IconButton(
@@ -42,9 +41,15 @@ def FileManagerView():
             ),
         ],
     )
-    ft.context.page.appbar = app_bar
-    ft.context.page.update()
-    return UserFiles()
+    content = ft.SafeArea(
+        expand=True,
+        content=UserFiles()
+    )
+    return ft.View(
+        route="/file-manager",
+        appbar=app_bar,
+        controls=content,
+    )
 
 @ft.component
 def EditorView():
@@ -53,52 +58,51 @@ def EditorView():
         actions=[
             ft.IconButton(
                 ft.Icons.SEARCH,
-                on_click=lambda e: ft.context.page.navigate("/test/435")
+                on_click=lambda e: ft.context.page.navigate("/file-manager")
             ),
             ft.IconButton(ft.Icons.MORE_VERT),
         ],                                                     )
-    ft.context.page.appbar = app_bar
-
-    #def default_text():
-    #    text: str = ""
-    #    with open(ft.context.page.file_path, "r") as f:
-    #        text = f.read()
-    #    return text
 
     textbox = ft.TextField(
-            #value=default_text(),
         expand=True,
         hint_text="Write your ideas here...",
         multiline=True,
         border=ft.NoInputBorder(),
     )
 
-    content = ft.Column(
+    content = ft.SafeArea(
         expand=True,
-        controls=[
-            textbox,
-        ]
+        content=ft.Column(
+            expand=True,
+            controls=[
+                textbox,
+            ]
+        )
     )
-    return content
+    return ft.View(
+        route="/",
+        appbar=app_bar,
+        controls=content,
+    )
 
 @ft.component
 def App():
-    ft.context.page.padding=20
-    return ft.SafeArea(
-        expand=True,
-        content=ft.Router(
-            [
-                ft.Route(
-                    index=True,
-                    component=EditorView
-                ),
-                ft.Route(
-                    path="test/:id",
-                    component=FileManagerView,
-                ),
-            ]
-        ),
+    #ft.context.page.padding=20
+    router = ft.Router(
+        [
+            ft.Route(
+                component=EditorView,
+                children=[
+                    ft.Route(
+                        path="file-manager",
+                        component=FileManagerView,
+                    ),
+                ],
+            ),
+        ],
+        manage_views=True,
     )
+    return router
 
 if __name__ == "__main__":
-    ft.run(lambda page: page.render(App))
+    ft.run(lambda page: page.render_views(App))
