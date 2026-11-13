@@ -2,61 +2,45 @@ import flet as ft
 import os
 from pathlib import Path
 
-FLET_APP_STORAGE_DATA = Path(os.getenv("FLET_APP_STORAGE_DATA"))
-USER_DATA_PATH = FLET_APP_STORAGE_DATA / "user"
+FLET_APP_STORAGE_DATA: Path = Path(os.getenv("FLET_APP_STORAGE_DATA"))
+DEFAULT_USER_DATA_PATH: Path = FLET_APP_STORAGE_DATA / "user"
 
 @ft.component
 def EditorView():
-    show_rename_file_dialog, set_show_rename_file_dialog = ft.use_state(False)
     textbox_value, set_textbox_value = ft.use_state("")
+    app_bar_title, set_app_bar_title = ft.use_state("Untitled.txt")
 
-    ft.use_dialog(
-        ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Renaming file"),
-            content=ft.TextField(
-                hint_text="ex: ToDo.txt"
-            ),
-            actions=[
-                ft.TextButton(
-                    "Confirm",
-                    on_click=lambda: set_show_rename_file_dialog(False)
-                ),
-                ft.TextButton(
-                    "Nevermind",
-                    on_click=lambda: set_show_rename_file_dialog(False)
-                ),
-            ],
-        ) if show_rename_file_dialog else None
-    )
+    async def save_file():
+        path: Path = USER_DATA_PATH / app_bar_title
+        if path.exists():
+            with open(path, "w") as file:
+                file.write(textbox_value)
 
-    async def save_file(e):
-        title: str = app_bar.title.value
-        path: Path = USER_DATA_PATH / title
-        #with open(path, "w") as file:
-        #    file.write(textbox.value)
-    # Bind to the AlertDialog later
-    #async def rename_file(e):
-    #    title: str = app_bar.title.value
-    #    old_path = Path(USER_DATA_PATH / title)
-    #    set_show_rename_file_dialog(True)
+    async def save_file_as(e):
+        file_picker = ft.FilePicker()
+        encoded: bytes = textbox_value.encode("utf-8")
+        await file_picker.save_file(
+            file_name=app_bar_title,
+            src_bytes=encoded if encoded else b" ",
+        )
+
     async def handle_textbox_change(e):
         set_textbox_value(e.control.value)
+        await save_file()
 
     app_bar = ft.AppBar(
         leading=ft.PopupMenuButton(
             icon=ft.Icons.MENU,
             items=[
                 ft.PopupMenuItem(
-                    "Rename file",
-                    on_click=lambda: set_show_rename_file_dialog(True),
+                    "Save as",
+                    on_click=save_file_as,
                 ),
-                ft.PopupMenuItem("Save as"),
                 ft.PopupMenuItem("Open file"),
                 ft.PopupMenuItem("Settings"),
             ]
         ),
-        title=ft.Text("Untitled"),
+        title=ft.Text(f"{app_bar_title}"),
         actions=[
             ft.IconButton(ft.Icons.MORE_VERT),
         ],                                                     )
