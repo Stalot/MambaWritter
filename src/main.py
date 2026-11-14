@@ -108,7 +108,7 @@ def AndroidSetupView():
                             expand=True,
                             content="Finish setup",
                             on_click=lambda: ft.context.page.navigate("/editor"),
-                            disabled=finish_button_disabled,
+                            #disabled=finish_button_disabled,
                         )
                     ]
                 )
