@@ -6,7 +6,7 @@ from pathlib import Path
 FLET_APP_STORAGE_DATA: Path = Path(os.getenv("FLET_APP_STORAGE_DATA"))
 DEFAULT_USER_DATA_PATH: Path = FLET_APP_STORAGE_DATA / "user"
 
-# status = await ph.get_status(fph.Permission.MICROPHONE)
+global_custom_user_data_path: Path = DEFAULT_USER_DATA_PATH
 
 @ft.component
 def AppStartupView():
@@ -17,13 +17,15 @@ def AppStartupView():
 
 @ft.component
 def AndroidSetupView():
-    finish_button_disabled, set_finish_button_disabled = ft.use_state(True)
+    necessary_permissions, set_necessary_permissions = ft.use_state(1)
     current_storage_location, set_current_storage_location = ft.use_state(DEFAULT_USER_DATA_PATH)
 
     ph = ftph.PermissionHandler()
 
     async def request_external_storage(e):
-        await ph.request(ftph.Permission.MANAGE_EXTERNAL_STORAGE),
+        status = await ph.request(ftph.Permission.MANAGE_EXTERNAL_STORAGE)
+        if status:
+            set_necessary_permissions(necessary_permissions-1)
 
     async def ask_folder_location(e):
         picker = ft.FilePicker()
@@ -108,7 +110,7 @@ def AndroidSetupView():
                             expand=True,
                             content="Finish setup",
                             on_click=lambda: ft.context.page.navigate("/editor"),
-                            #disabled=finish_button_disabled,
+                            disabled=True if necessary_permissions > 0 else False,
                         )
                     ]
                 )
@@ -131,8 +133,8 @@ def EditorView():
     app_bar_title, set_app_bar_title = ft.use_state("Untitled.txt")
 
     async def save_file():
-        path: Path = USER_DATA_PATH / app_bar_title
-        if path.exists():
+        path: Path = global_custom_user_data_path / app_bar_title
+        if path.exists():          
             with open(path, "w") as file:
                 file.write(textbox_value)
 
@@ -141,6 +143,7 @@ def EditorView():
         encoded: bytes = textbox_value.encode("utf-8")
         await file_picker.save_file(
             file_name=app_bar_title,
+            initial_directory=global_custom_user_data_path.as_posix(),
             src_bytes=encoded if encoded else b" ",
         )
 
